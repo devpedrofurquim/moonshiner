@@ -1,0 +1,66 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Level-01.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "Level-01.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 307.3333333333333,
+                "y": 158
+            }
+        },
+        "Level-02.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 320,
+                "y": 184.33333333333334
+            }
+        },
+        "Moonshiner.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Moonshiner2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/pedro/Development/moonshiner_game/assets/images/Terrain",
+    "map.height": 23,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 40,
+    "openFiles": [
+        "Moonshiner.tsx",
+        "Level-01.tmx",
+        "Level-02.tmx",
+        "Moonshiner2.tsx"
+    ],
+    "project": "moonshiner.tiled-project",
+    "recentFiles": [
+        "Moonshiner.tsx",
+        "Moonshiner2.tsx",
+        "Level-02.tmx",
+        "Level-01.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
