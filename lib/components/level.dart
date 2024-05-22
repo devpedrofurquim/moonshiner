@@ -18,6 +18,18 @@ class Level extends World {
 
     add(level);
 
+    _scrollingBackground();
+
+    _spawningObjects();
+
+    _addCollisions();
+
+    return super.onLoad();
+  }
+
+  void _scrollingBackground() {}
+
+  void _spawningObjects() {
     final spawnPointsLayer = level.tileMap.getLayer<ObjectGroup>('SpawnPoints');
 
     if (spawnPointsLayer != null) {
@@ -31,7 +43,9 @@ class Level extends World {
         }
       }
     }
+  }
 
+  void _addCollisions() {
     final collisionsLayer = level.tileMap.getLayer<ObjectGroup>('Collisions');
 
     if (collisionsLayer != null) {
@@ -65,6 +79,5 @@ class Level extends World {
       }
     }
     player.collisionBlocks = collisionBlocks;
-    return super.onLoad();
   }
 }

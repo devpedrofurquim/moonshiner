@@ -13,10 +13,10 @@
                 2
             ],
             "scale": 1.5,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 307.3333333333333,
-                "y": 158
+                "x": 306,
+                "y": 156.66666666666669
             }
         },
         "Level-02.tmx": {
@@ -26,8 +26,8 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 320,
-                "y": 184.33333333333334
+                "x": 318.66666666666663,
+                "y": 183.33333333333334
             }
         },
         "Moonshiner.tsx": {
@@ -48,15 +48,14 @@
     "openFiles": [
         "Moonshiner.tsx",
         "Level-01.tmx",
-        "Level-02.tmx",
-        "Moonshiner2.tsx"
+        "Level-02.tmx"
     ],
     "project": "moonshiner.tiled-project",
     "recentFiles": [
         "Moonshiner.tsx",
-        "Moonshiner2.tsx",
         "Level-02.tmx",
-        "Level-01.tmx"
+        "Level-01.tmx",
+        "Moonshiner2.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
