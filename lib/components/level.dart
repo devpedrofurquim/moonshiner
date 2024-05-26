@@ -7,12 +7,14 @@ import 'package:moonshiner_game/components/collision_block.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
+import 'enemy.dart';
 import 'itemTip.dart';
 
 class Level extends World with HasGameRef<Moonshiner> {
   final String levelName;
   final Player player;
-  Level({required this.levelName, required this.player});
+  final Enemy enemy;
+  Level({required this.levelName, required this.player, required this.enemy});
   late TiledComponent level;
   List<CollisionBlock> collisionBlocks = [];
 
@@ -72,6 +74,10 @@ class Level extends World with HasGameRef<Moonshiner> {
                 size: Vector2(spawnPoint.width, spawnPoint.height));
             add(itemTip);
             break;
+          case 'Enemy':
+            enemy.position = Vector2(spawnPoint.x, spawnPoint.y);
+            add(enemy);
+            break;
           default:
         }
       }
@@ -101,6 +107,15 @@ class Level extends World with HasGameRef<Moonshiner> {
             );
             collisionBlocks.add(ground);
             add(ground);
+            break;
+          case 'Player':
+            final player = CollisionBlock(
+                position: Vector2(collision.x, collision.y),
+                size: Vector2(collision.width, collision.height),
+                isPlayer: true);
+            collisionBlocks.add(player);
+            add(player);
+            break;
           default:
             final block = CollisionBlock(
               position: Vector2(collision.x, collision.y),
@@ -112,5 +127,6 @@ class Level extends World with HasGameRef<Moonshiner> {
       }
     }
     player.collisionBlocks = collisionBlocks;
+    enemy.collisionBlocks = collisionBlocks;
   }
 }

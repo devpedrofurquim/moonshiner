@@ -20,3 +20,25 @@ bool checkCollision(player, block) {
       fixedX < blockX + blockWidth &&
       fixedX + playerWidth > blockX);
 }
+
+bool checkEnemyCollision(enemy, block) {
+  final hitbox = enemy.hitbox;
+  final enemyX = enemy.position.x + hitbox.offsetX;
+  final enemyY = enemy.position.y + hitbox.offsetY;
+  final enemyWidth = hitbox.width;
+  final enemyHeight = hitbox.height;
+
+  final blockX = block.x;
+  final blockY = block.y;
+  final blockWidth = block.width;
+  final blockHeight = block.height;
+
+  final fixedX =
+      enemy.scale.x < 0 ? enemyX - (hitbox.offsetX * 2) - enemyWidth : enemyX;
+  final fixedY = block.isWall ? enemyY + enemyHeight / 2 : enemyY;
+
+  return (fixedY < blockY + blockHeight &&
+      fixedY + enemyHeight > blockY &&
+      fixedX < blockX + blockWidth &&
+      fixedX + enemyWidth > blockX);
+}

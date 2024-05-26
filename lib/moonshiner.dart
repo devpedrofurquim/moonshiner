@@ -9,8 +9,12 @@ import 'package:moonshiner_game/components/level.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:flame/input.dart';
 
+import 'components/enemy.dart';
+import 'components/hud.dart';
+
 class Moonshiner extends FlameGame
     with HasKeyboardHandlerComponents, DragCallbacks, HasCollisionDetection {
+  late HUDMessage hudMessage; // Declare HUDMessage variable
   @override
   Color backgroundColor() => const Color(0xFF211F30);
   late JoystickComponent joyStick;
@@ -18,13 +22,14 @@ class Moonshiner extends FlameGame
   bool showJoyStick = true;
   late final CameraComponent cam;
   Player player = Player(character: 'Guy');
+  Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
   @override
   FutureOr<void> onLoad() async {
     // load all images into cache
     await images.loadAllImages();
 
     @override
-    final world = Level(levelName: 'Level-01', player: player);
+    final world = Level(levelName: 'Level-01', player: player, enemy: enemy);
 
     cam = CameraComponent.withFixedResolution(
         world: world, width: 640, height: 360);
@@ -36,6 +41,14 @@ class Moonshiner extends FlameGame
     if (showJoyStick) {
       addJoyStick();
     }
+
+    hudMessage = HUDMessage(
+      // Create HUDMessage instance
+      message: '', // Set the message
+      position: Vector2(
+          100, 100), // Set the position where you want to display the message
+    );
+    add(hudMessage); // Add the HUDMessage component to the game
 
     return super.onLoad();
   }

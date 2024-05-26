@@ -15,8 +15,8 @@
             "scale": 1.5,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 301.3333333333333,
-                "y": 154
+                "x": 286.66666666666663,
+                "y": 152
             }
         },
         "Level-02.tmx": {
@@ -51,6 +51,7 @@
         "Level-02.tmx"
     ],
     "project": "moonshiner.tiled-project",
+    "property.type": "float",
     "recentFiles": [
         "Moonshiner.tsx",
         "Level-02.tmx",

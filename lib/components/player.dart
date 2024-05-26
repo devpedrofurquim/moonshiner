@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 import 'package:moonshiner_game/components/custom_hitbox.dart';
+import 'package:moonshiner_game/components/enemy.dart';
 import 'package:moonshiner_game/components/itemTip.dart';
 import 'package:moonshiner_game/components/utils.dart';
 import 'package:moonshiner_game/moonshiner.dart';
@@ -81,6 +82,7 @@ class Player extends SpriteAnimationGroupComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is ItemTip) other.collidingWithPlayer();
+    if (other is Enemy) other.collidingWithPlayer();
     super.onCollision(intersectionPoints, other);
   }
 
