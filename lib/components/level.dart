@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:moonshiner_game/components/background_tile.dart';
 import 'package:moonshiner_game/components/collision_block.dart';
 import 'package:moonshiner_game/components/player.dart';
+import 'package:moonshiner_game/moonshiner.dart';
 
-class Level extends World {
+import 'itemTip.dart';
+
+class Level extends World with HasGameRef<Moonshiner> {
   final String levelName;
   final Player player;
   Level({required this.levelName, required this.player});
@@ -27,7 +31,29 @@ class Level extends World {
     return super.onLoad();
   }
 
-  void _scrollingBackground() {}
+  void _scrollingBackground() {
+    final backgroundLayer = level.tileMap.getLayer("Background");
+
+    const tileSize = 64;
+
+    final numTilesY = (game.size.y / tileSize);
+    final numTilesX = (game.size.x / tileSize);
+
+    if (backgroundLayer != null) {
+      final backgroundColor =
+          backgroundLayer.properties.getValue("BackgroundColor");
+
+      for (double y = 0; y < numTilesY; y++) {
+        for (double x = 0; x < numTilesX; x++) {
+          final backgroundTile = BackgroundTile(
+            color: backgroundColor ?? 'Gray',
+            position: Vector2(x * tileSize - tileSize, y * tileSize - tileSize),
+          );
+          add(backgroundTile);
+        }
+      }
+    }
+  }
 
   void _spawningObjects() {
     final spawnPointsLayer = level.tileMap.getLayer<ObjectGroup>('SpawnPoints');
@@ -38,6 +64,13 @@ class Level extends World {
           case 'Player':
             player.position = Vector2(spawnPoint.x, spawnPoint.y);
             add(player);
+            break;
+          case 'Objects':
+            final itemTip = ItemTip(
+                itemTip: spawnPoint.name,
+                position: Vector2(spawnPoint.x, spawnPoint.y),
+                size: Vector2(spawnPoint.width, spawnPoint.height));
+            add(itemTip);
             break;
           default:
         }

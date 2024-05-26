@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
-import 'package:moonshiner_game/components/player_hitbox.dart';
+import 'package:moonshiner_game/components/custom_hitbox.dart';
+import 'package:moonshiner_game/components/itemTip.dart';
 import 'package:moonshiner_game/components/utils.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
@@ -12,7 +13,7 @@ import 'collision_block.dart';
 enum PlayerState { idle, running }
 
 class Player extends SpriteAnimationGroupComponent
-    with KeyboardHandler, HasGameRef<Moonshiner> {
+    with KeyboardHandler, HasGameRef<Moonshiner>, CollisionCallbacks {
   String character;
 
   // ignore: use_super_parameters
@@ -24,7 +25,7 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
   bool isOnGround = false;
-  PlayerHitbox hitbox = PlayerHitbox(
+  CustomHitbox hitbox = CustomHitbox(
     offsetX: 10,
     offsetY: 4,
     height: 28,
@@ -42,6 +43,7 @@ class Player extends SpriteAnimationGroupComponent
 
   @override
   FutureOr<void> onLoad() {
+    priority = 2;
     _loadAllAnimations();
     // debugMode = true;
     add(RectangleHitbox(
@@ -74,6 +76,12 @@ class Player extends SpriteAnimationGroupComponent
     verticalMovement += isDownKeyPressed ? 1 : 0;
 
     return super.onKeyEvent(event, keysPressed);
+  }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (other is ItemTip) other.collidingWithPlayer();
+    super.onCollision(intersectionPoints, other);
   }
 
   @override
