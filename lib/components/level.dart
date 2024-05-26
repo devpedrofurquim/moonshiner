@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +79,7 @@ class Level extends World with HasGameRef<Moonshiner> {
             add(itemTip);
             break;
           case 'Enemy':
+            enemy.enemyCharacter = 'Ninja Frog';
             enemy.position = Vector2(spawnPoint.x, spawnPoint.y);
             add(enemy);
             break;

@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts for custom fonts
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:moonshiner_game/moonshiner.dart';
+import 'package:flame_audio/flame_audio.dart';
 
-class MainMenu extends StatelessWidget {
-  // Reference to parent game.
+class MainMenu extends StatefulWidget {
   final Moonshiner game;
 
   const MainMenu({super.key, required this.game});
+
+  @override
+  _MainMenuState createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  @override
+  void initState() {
+    super.initState();
+    FlameAudio.bgm.play('main_menu_music.mp3', volume: 1.0);
+  }
+
+  @override
+  void dispose() {
+    FlameAudio.bgm.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +63,7 @@ class MainMenu extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Moonshiner Quest',
+                    'Moonshiner',
                     style: GoogleFonts.pirataOne(
                       // Custom font
                       textStyle: const TextStyle(
@@ -62,7 +78,11 @@ class MainMenu extends StatelessWidget {
                     height: 75,
                     child: ElevatedButton(
                       onPressed: () {
-                        game.overlays.remove('MainMenu');
+                        // Stop the main menu music
+                        FlameAudio.bgm.stop();
+                        // Transition to level-01 and play the new game music
+                        widget.game.overlays.remove('MainMenu');
+                        widget.game.playBackgroundMusicForLevel('Level-01');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
@@ -81,10 +101,10 @@ class MainMenu extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Text(
+                  const Text(
                     '''Collect as many stars as you can and avoid enemies!''',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: whiteTextColor,
                       fontSize: 14,
                     ),

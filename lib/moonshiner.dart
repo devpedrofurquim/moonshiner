@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:moonshiner_game/components/level.dart';
 import 'package:moonshiner_game/components/player.dart';
@@ -46,15 +47,30 @@ class Moonshiner extends FlameGame
       addJoyStick();
     }
 
-    hudMessage = HUDMessage(
-      // Create HUDMessage instance
-      message: '', // Set the message
-      position: Vector2(
-          100, 100), // Set the position where you want to display the message
-    );
-    add(hudMessage); // Add the HUDMessage component to the game
-
     return super.onLoad();
+  }
+
+  void playBackgroundMusicForLevel(String levelName) {
+    // Stop any currently playing music
+    FlameAudio.bgm.stop();
+
+    // Determine which music to play based on the level
+    String musicFileName;
+    switch (levelName) {
+      case 'Level-01':
+        musicFileName = 'the_farewell_ost.wav';
+        break;
+      case 'Level-02':
+        musicFileName = 'moonshine_ost.mp3';
+        break;
+      // Add cases for other levels as needed
+      default:
+        musicFileName = 'default_music.mp3';
+        break;
+    }
+
+    // Play the background music for the level
+    FlameAudio.bgm.play(musicFileName, volume: 1.0);
   }
 
   @override

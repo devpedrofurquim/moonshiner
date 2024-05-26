@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -32,6 +33,9 @@ class Enemy extends SpriteAnimationGroupComponent
   List<CollisionBlock> collisionBlocks = [];
 
   bool movingLeft = true;
+  bool movingUp = true;
+  double changeDirectionProbability =
+      0.005; // Adjust this probability as needed
 
   Enemy({
     position,
@@ -104,8 +108,11 @@ class Enemy extends SpriteAnimationGroupComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player) {
-      playerColliding = true; // Set flag to true when colliding with player
-      collidingWithPlayer();
+      playerColliding = true;
+      // Set the message to display the name of the character
+      hudMessage.message = "Beware! $enemyCharacter Ahead!";
+      hudMessage.position = position + Vector2(0, -30);
+      gameRef.add(hudMessage);
     }
     super.onCollision(intersectionPoints, other);
   }
@@ -114,11 +121,14 @@ class Enemy extends SpriteAnimationGroupComponent
   void onCollisionEnd(PositionComponent other) {
     if (other is Player) {
       playerColliding = false; // Reset flag when player collision ends
+      // Remove message from the game
+      gameRef.remove(hudMessage);
     }
     super.onCollisionEnd(other);
   }
 
   void _updateEnemyMovement(double dt) {
+    // Apply horizontal movement
     if (movingLeft) {
       velocity.x = -moveSpeed;
       if (scale.x > 0) {
@@ -131,6 +141,22 @@ class Enemy extends SpriteAnimationGroupComponent
       }
     }
 
+    // Apply vertical movement
+    if (movingUp) {
+      velocity.y = -moveSpeed;
+    } else {
+      velocity.y = moveSpeed;
+    }
+
+    // Introduce random changes in direction
+    if (Random().nextDouble() < changeDirectionProbability) {
+      movingLeft = !movingLeft;
+    }
+    if (Random().nextDouble() < changeDirectionProbability) {
+      movingUp = !movingUp;
+    }
+
+    // Update position
     position.x += velocity.x * dt;
     position.y += velocity.y * dt;
   }
@@ -138,8 +164,13 @@ class Enemy extends SpriteAnimationGroupComponent
   void _checkCollisions() {
     for (final block in collisionBlocks) {
       if (checkCollision(this, block)) {
+        // Check for collisions in the x-direction
         if (velocity.x < 0 || velocity.x > 0) {
           movingLeft = !movingLeft;
+        }
+        // Check for collisions in the y-direction
+        if (velocity.y < 0 || velocity.y > 0) {
+          movingUp = !movingUp;
         }
       }
     }
