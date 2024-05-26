@@ -8,6 +8,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:moonshiner_game/components/level.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:flame/input.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'components/enemy.dart';
 import 'components/hud.dart';
@@ -15,6 +17,7 @@ import 'components/hud.dart';
 class Moonshiner extends FlameGame
     with HasKeyboardHandlerComponents, DragCallbacks, HasCollisionDetection {
   late HUDMessage hudMessage; // Declare HUDMessage variable
+
   @override
   Color backgroundColor() => const Color(0xFF211F30);
   late JoystickComponent joyStick;
@@ -23,6 +26,7 @@ class Moonshiner extends FlameGame
   late final CameraComponent cam;
   Player player = Player(character: 'Guy');
   Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
+
   @override
   FutureOr<void> onLoad() async {
     // load all images into cache
@@ -115,5 +119,15 @@ class Moonshiner extends FlameGame
         player.verticalMovement = 0;
         break;
     }
+  }
+
+  @override
+  void pause() {
+    pauseEngine();
+  }
+
+  @override
+  void resume() {
+    resumeEngine();
   }
 }

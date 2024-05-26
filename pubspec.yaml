@@ -37,10 +37,12 @@ dependencies:
   cupertino_icons: ^1.0.6
   flame: ^1.16.0
   flame_tiled: ^1.19.0
+  flame_audio: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  google_fonts: ^4.0.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -74,6 +76,8 @@ flutter:
     - assets/images/Main Characters/Guy/
     - assets/images/HUD/
     - assets/images/Items/Objects/
+    - assets/images/background.png
+    - assets/audio/main_menu_music.mp3
 
 
 
