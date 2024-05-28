@@ -16,7 +16,7 @@ class Door extends SpriteAnimationComponent
 
   @override
   FutureOr<void> onLoad() {
-    debugMode = true;
+    debugMode = false;
     add(RectangleHitbox(collisionType: CollisionType.passive));
     animation = SpriteAnimation.fromFrameData(
         game.images

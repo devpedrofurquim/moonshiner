@@ -143,29 +143,22 @@ class Moonshiner extends FlameGame
   void loadNextLevel() {
     if (currentLevelindex < levelNames.length - 1) {
       currentLevelindex++;
-      _loadLevel();
     } else {
       currentLevelindex--;
-      _loadLevel();
     }
+    _loadLevel();
   }
 
   void _loadLevel() {
-    Future.delayed(const Duration(seconds: 1), () {
-      @override
-      Level world = Level(
-          levelName: levelNames[currentLevelindex],
-          player: player,
-          enemy: enemy);
+    @override
+    final world = Level(
+        levelName: levelNames[currentLevelindex], player: player, enemy: enemy);
 
-      playBackgroundMusicForLevel(levelNames[currentLevelindex]);
+    cam = CameraComponent.withFixedResolution(
+        world: world, width: 640, height: 360);
+    cam.priority = 1;
+    cam.viewfinder.anchor = Anchor.topLeft;
 
-      cam = CameraComponent.withFixedResolution(
-          world: world, width: 640, height: 360);
-      cam.priority = 1;
-      cam.viewfinder.anchor = Anchor.topLeft;
-
-      addAll([cam, world]);
-    });
+    addAll([cam, world]);
   }
 }
