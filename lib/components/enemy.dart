@@ -35,7 +35,10 @@ class Enemy extends SpriteAnimationGroupComponent
   bool movingLeft = true;
   bool movingUp = true;
   double changeDirectionProbability =
-      0.005; // Adjust this probability as needed
+      0.003; // Adjust this probability as needed
+  int stillnessCounter = 0; // Counter to track remaining stillness duration
+  int maxStillnessDuration =
+      60; // Maximum duration for stillness (adjust as needed)
 
   Enemy({
     position,
@@ -164,13 +167,42 @@ class Enemy extends SpriteAnimationGroupComponent
   void _checkCollisions() {
     for (final block in collisionBlocks) {
       if (checkCollision(this, block)) {
-        // Check for collisions in the x-direction
-        if (velocity.x < 0 || velocity.x > 0) {
-          movingLeft = !movingLeft;
-        }
-        // Check for collisions in the y-direction
-        if (velocity.y < 0 || velocity.y > 0) {
-          movingUp = !movingUp;
+        if (velocity.x != 0 || velocity.y != 0) {
+          // Enemy is currently moving
+          if (block.isWall) {
+            // Handle wall collision
+            if (velocity.x != 0) {
+              movingLeft = !movingLeft;
+            }
+            if (velocity.y != 0) {
+              movingUp = !movingUp;
+              movingLeft = !movingLeft;
+            }
+          } else if (block.isGround) {
+            // Handle ground collision
+            if (velocity.y != 0) {
+              movingUp = !movingUp;
+            }
+          } else {
+            // Handle collision with other obstacles
+            if (velocity.y != 0) {
+              movingUp = !movingUp;
+            }
+            if (velocity.x != 0) {
+              movingLeft = !movingLeft;
+            }
+          }
+        } else {
+          // Enemy is currently still
+          if (stillnessCounter <= 0) {
+            // Stillness period is over, resume walking
+            stillnessCounter = Random().nextInt(maxStillnessDuration) + 1;
+            movingLeft = Random().nextBool();
+            movingUp = Random().nextBool();
+          } else {
+            // Decrement stillness counter
+            stillnessCounter--;
+          }
         }
       }
     }

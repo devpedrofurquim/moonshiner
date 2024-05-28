@@ -10,6 +10,7 @@ import 'package:moonshiner_game/components/utils.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
 import 'collision_block.dart';
+import 'door.dart';
 
 enum PlayerState { idle, running }
 
@@ -32,7 +33,7 @@ class Player extends SpriteAnimationGroupComponent
     height: 28,
     width: 14,
   );
-
+  bool reacheDoor = false;
   double horizontalMovement = 0;
   double verticalMovement = 0;
   double moveSpeed = 50;
@@ -83,6 +84,7 @@ class Player extends SpriteAnimationGroupComponent
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is ItemTip) other.collidingWithPlayer();
     if (other is Enemy) other.collidingWithPlayer();
+    if (other is Door && !reacheDoor) _reachedDoor();
     super.onCollision(intersectionPoints, other);
   }
 
@@ -181,5 +183,10 @@ class Player extends SpriteAnimationGroupComponent
     velocity.y += _gravity;
     velocity.y = velocity.y.clamp(-_jumpForce, _terminalVelocity);
     position.y += velocity.y * dt;
+  }
+
+  void _reachedDoor() {
+    reacheDoor = true;
+    game.loadNextLevel();
   }
 }

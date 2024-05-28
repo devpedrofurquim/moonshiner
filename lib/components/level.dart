@@ -11,6 +11,7 @@ import 'package:moonshiner_game/components/collision_block.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
+import 'door.dart';
 import 'enemy.dart';
 import 'itemTip.dart';
 
@@ -82,6 +83,12 @@ class Level extends World with HasGameRef<Moonshiner> {
             enemy.enemyCharacter = 'Ninja Frog';
             enemy.position = Vector2(spawnPoint.x, spawnPoint.y);
             add(enemy);
+            break;
+          case 'Door':
+            final door = Door(
+                position: Vector2(spawnPoint.x, spawnPoint.y),
+                size: Vector2(spawnPoint.width, spawnPoint.height));
+            add(door);
             break;
           default:
         }

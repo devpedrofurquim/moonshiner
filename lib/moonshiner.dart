@@ -24,24 +24,17 @@ class Moonshiner extends FlameGame
   late JoystickComponent joyStick;
   // true for mobile - false for desktop
   bool showJoyStick = true;
-  late final CameraComponent cam;
+  late CameraComponent cam;
   Player player = Player(character: 'Guy');
   Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
-
+  List<String> levelNames = ['Level-01', 'Level-02'];
+  int currentLevelindex = 0;
   @override
   FutureOr<void> onLoad() async {
     // load all images into cache
     await images.loadAllImages();
 
-    @override
-    final world = Level(levelName: 'Level-01', player: player, enemy: enemy);
-
-    cam = CameraComponent.withFixedResolution(
-        world: world, width: 640, height: 360);
-    cam.priority = 1;
-    cam.viewfinder.anchor = Anchor.topLeft;
-
-    addAll([cam, world]);
+    _loadLevel();
 
     if (showJoyStick) {
       addJoyStick();
@@ -145,5 +138,34 @@ class Moonshiner extends FlameGame
   @override
   void resume() {
     resumeEngine();
+  }
+
+  void loadNextLevel() {
+    if (currentLevelindex < levelNames.length - 1) {
+      currentLevelindex++;
+      _loadLevel();
+    } else {
+      currentLevelindex--;
+      _loadLevel();
+    }
+  }
+
+  void _loadLevel() {
+    Future.delayed(const Duration(seconds: 1), () {
+      @override
+      Level world = Level(
+          levelName: levelNames[currentLevelindex],
+          player: player,
+          enemy: enemy);
+
+      playBackgroundMusicForLevel(levelNames[currentLevelindex]);
+
+      cam = CameraComponent.withFixedResolution(
+          world: world, width: 640, height: 360);
+      cam.priority = 1;
+      cam.viewfinder.anchor = Anchor.topLeft;
+
+      addAll([cam, world]);
+    });
   }
 }
