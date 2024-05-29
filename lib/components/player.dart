@@ -42,6 +42,7 @@ class Player extends SpriteAnimationGroupComponent
   final double _gravity = 8.9;
   final double _jumpForce = 460;
   final double _terminalVelocity = 300;
+  bool hasInteracted = false;
 
   @override
   FutureOr<void> onLoad() {
@@ -84,11 +85,11 @@ class Player extends SpriteAnimationGroupComponent
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is ItemTip) other.collidingWithPlayer();
     if (other is Enemy) other.collidingWithPlayer();
-    if (other is Door) {
+    if (other is Door && hasInteracted) {
       if (!reacheDoor) {
         _reachedDoor();
       }
-      reacheDoor = !reacheDoor;
+      hasInteracted = false;
     }
     super.onCollision(intersectionPoints, other);
   }

@@ -6,6 +6,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:moonshiner_game/components/button.dart';
 import 'package:moonshiner_game/components/level.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:flame/input.dart';
@@ -16,14 +17,18 @@ import 'components/enemy.dart';
 import 'components/hud.dart';
 
 class Moonshiner extends FlameGame
-    with HasKeyboardHandlerComponents, DragCallbacks, HasCollisionDetection {
+    with
+        HasKeyboardHandlerComponents,
+        DragCallbacks,
+        HasCollisionDetection,
+        TapCallbacks {
   late HUDMessage hudMessage; // Declare HUDMessage variable
 
   @override
   Color backgroundColor() => const Color(0xFF211F30);
   late JoystickComponent joyStick;
   // true for mobile - false for desktop
-  bool showJoyStick = true;
+  bool showControls = true;
   late CameraComponent cam;
   Player player = Player(character: 'Guy');
   Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
@@ -36,8 +41,8 @@ class Moonshiner extends FlameGame
 
     _loadLevel();
 
-    if (showJoyStick) {
-      addJoyStick();
+    if (showControls) {
+      addControls();
     }
 
     return super.onLoad();
@@ -68,13 +73,13 @@ class Moonshiner extends FlameGame
 
   @override
   void update(double dt) {
-    if (showJoyStick) {
-      updateJoyStick();
+    if (showControls) {
+      updateControls();
     }
     super.update(dt);
   }
 
-  void addJoyStick() {
+  void addControls() {
     joyStick = JoystickComponent(
       priority: 2,
       knob: SpriteComponent(
@@ -91,9 +96,10 @@ class Moonshiner extends FlameGame
       margin: const EdgeInsets.only(left: 32, bottom: 32),
     );
     add(joyStick);
+    add(Button());
   }
 
-  void updateJoyStick() {
+  void updateControls() {
     switch (joyStick.direction) {
       case JoystickDirection.left:
         player.horizontalMovement = -1;
