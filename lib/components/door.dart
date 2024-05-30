@@ -26,12 +26,21 @@ class Door extends SpriteAnimationComponent
     return super.onLoad();
   }
 
+  // @override
+  // void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+  //   if (other is Player && !reacheDoor) {
+  //     _reachedDoor();
+  //   }
+  //   super.onCollision(intersectionPoints, other);
+  // }
+
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player && !reacheDoor) {
       _reachedDoor();
     }
-    super.onCollision(intersectionPoints, other);
+    super.onCollisionStart(intersectionPoints, other);
   }
 
   void _reachedDoor() {

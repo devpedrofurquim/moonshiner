@@ -85,8 +85,6 @@ class Player extends SpriteAnimationGroupComponent
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other is ItemTip) other.collidingWithPlayer();
-    if (other is Enemy) other.collidingWithPlayer();
     if (other is Door && hasInteracted) {
       if (!reacheDoor) {
         _reachedDoor();
@@ -94,6 +92,14 @@ class Player extends SpriteAnimationGroupComponent
       hasInteracted = false;
     }
     super.onCollision(intersectionPoints, other);
+  }
+
+  @override
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (other is ItemTip) other.collidingWithPlayer();
+    if (other is Enemy) other.collidingWithPlayer();
+    super.onCollisionStart(intersectionPoints, other);
   }
 
   @override

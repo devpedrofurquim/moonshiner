@@ -12,7 +12,6 @@ class ItemTip extends SpriteAnimationComponent
   ItemTip({this.itemTip = 'Lamp', position, size})
       : super(position: position, size: size);
 
-  bool _collected = false;
   final double stepTime = 0.05;
   final hitbox = CustomHitbox(
     offsetX: 10,
@@ -37,18 +36,16 @@ class ItemTip extends SpriteAnimationComponent
     return super.onLoad();
   }
 
-  void collidingWithPlayer() {
-    if (!_collected) {
-      animation = SpriteAnimation.fromFrameData(
-          game.images.fromCache('Items/Objects/Collected.png'),
-          SpriteAnimationData.sequenced(
-            amount: 6,
-            stepTime: stepTime,
-            textureSize: Vector2.all(32),
-            loop: false,
-          ));
-      _collected = true;
-    }
+  void collidingWithPlayer() async {
+    animation = SpriteAnimation.fromFrameData(
+        game.images.fromCache('Items/Objects/Collected.png'),
+        SpriteAnimationData.sequenced(
+          amount: 6,
+          stepTime: stepTime,
+          textureSize: Vector2.all(32),
+          loop: false,
+        ));
+    await animationTicker?.completed;
     removeOnFinish = true;
   }
 }
