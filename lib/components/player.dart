@@ -43,6 +43,8 @@ class Player extends SpriteAnimationGroupComponent
   final double _jumpForce = 460;
   final double _terminalVelocity = 300;
   bool hasInteracted = false;
+  double fixedDeltaTime = 1 / 60;
+  double accumulatedTime = 0;
 
   @override
   FutureOr<void> onLoad() {
@@ -96,9 +98,14 @@ class Player extends SpriteAnimationGroupComponent
 
   @override
   void update(double dt) {
-    _updatePlayerState(dt);
-    _updatePlayerMovement(dt);
-    _checkCollisions();
+    accumulatedTime += dt;
+
+    while (accumulatedTime >= fixedDeltaTime) {
+      _updatePlayerState(fixedDeltaTime);
+      _updatePlayerMovement(fixedDeltaTime);
+      _checkCollisions();
+      accumulatedTime -= fixedDeltaTime;
+    }
     super.update(dt);
   }
 

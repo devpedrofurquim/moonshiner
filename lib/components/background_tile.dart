@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/parallax.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
-class BackgroundTile extends SpriteComponent with HasGameRef<Moonshiner> {
+class BackgroundTile extends ParallaxComponent {
   final String color;
   BackgroundTile({
     this.color = 'Gray',
@@ -12,22 +14,17 @@ class BackgroundTile extends SpriteComponent with HasGameRef<Moonshiner> {
           position: position,
         );
 
-  final double scrollSpeed = 0.1;
+  final double scrollSpeed = 10;
 
   @override
-  FutureOr<void> onLoad() {
+  FutureOr<void> onLoad() async {
     priority = -1;
-    size = Vector2.all(64.6);
-    sprite = Sprite(game.images.fromCache("Background/$color.png"));
+    size = Vector2.all(64);
+    parallax = await game.loadParallax(
+        [ParallaxImageData('Background/$color.png')],
+        baseVelocity: Vector2(-scrollSpeed, 0),
+        repeat: ImageRepeat.repeat,
+        fill: LayerFill.none);
     return super.onLoad();
-  }
-
-  @override
-  void update(double dt) {
-    position.x += scrollSpeed;
-    double tileSize = 64;
-    int scrollWidth = (game.size.x / tileSize).floor();
-    if (position.x > scrollWidth * tileSize) position.x = -tileSize;
-    super.update(dt);
   }
 }
