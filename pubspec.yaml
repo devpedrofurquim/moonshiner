@@ -66,6 +66,7 @@ flutter:
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
     - assets/tiles/
+    - assets/audio/
     - assets/images/Terrain/
     - assets/images/Background/
     - assets/images/Main Characters/Mask Dude/

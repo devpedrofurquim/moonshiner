@@ -34,6 +34,8 @@ class Moonshiner extends FlameGame
   Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
   List<String> levelNames = ['Level-01', 'Level-02'];
   int currentLevelindex = 0;
+  bool playSounds = false;
+  double soundVolume = 1.0;
   @override
   FutureOr<void> onLoad() async {
     // load all images into cache
@@ -150,7 +152,7 @@ class Moonshiner extends FlameGame
     if (currentLevelindex < levelNames.length - 1) {
       currentLevelindex++;
     } else {
-      currentLevelindex--;
+      currentLevelindex = 0;
     }
     _loadLevel();
   }
