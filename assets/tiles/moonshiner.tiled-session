@@ -13,14 +13,14 @@
         },
         "Level-01.tmx": {
             "expandedObjectLayers": [
-                3,
-                2
+                2,
+                3
             ],
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 316,
-                "y": 180.66666666666669
+                "x": 315.3333333333333,
+                "y": 180
             }
         },
         "Level-01.tmx#Moonshiner": {
@@ -28,14 +28,14 @@
         },
         "Level-02.tmx": {
             "expandedObjectLayers": [
-                3,
-                2
+                2,
+                3
             ],
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 319.3333333333333,
-                "y": 184
+                "x": 318,
+                "y": 182.66666666666669
             }
         },
         "Moonshiner.tsx": {

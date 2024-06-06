@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -11,8 +10,6 @@ import 'package:moonshiner_game/components/level.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-
 import 'components/enemy.dart';
 import 'components/hud.dart';
 
@@ -22,41 +19,37 @@ class Moonshiner extends FlameGame
         DragCallbacks,
         HasCollisionDetection,
         TapCallbacks {
-  late HUDMessage hudMessage; // Declare HUDMessage variable
+  late HUDMessage hudMessage;
 
   @override
   Color backgroundColor() => const Color(0xFF211F30);
+
   late JoystickComponent joyStick;
-  // true for mobile - false for desktop
+  late Button interactButton;
+
   bool showControls = true;
   late CameraComponent cam;
+
   Player player = Player(character: 'Guy');
   Enemy enemy = Enemy(
     enemyCharacter: 'Mask Dude',
   );
+
   List<String> levelNames = ['Level-01', 'Level-02'];
   int currentLevelindex = 0;
   bool playSounds = false;
   double soundVolume = 1.0;
+
   @override
   FutureOr<void> onLoad() async {
-    // load all images into cache
     await images.loadAllImages();
-
+    addControls();
     _loadLevel(currentLevelindex);
-
-    if (showControls) {
-      addControls();
-    }
-
     return super.onLoad();
   }
 
   void playBackgroundMusicForLevel(String levelName) {
-    // Stop any currently playing music
     FlameAudio.bgm.stop();
-
-    // Determine which music to play based on the level
     String musicFileName;
     switch (levelName) {
       case 'Level-01':
@@ -65,13 +58,10 @@ class Moonshiner extends FlameGame
       case 'Level-02':
         musicFileName = 'moonshine_ost.mp3';
         break;
-      // Add cases for other levels as needed
       default:
         musicFileName = 'default_music.mp3';
         break;
     }
-
-    // Play the background music for the level
     FlameAudio.bgm.play(musicFileName, volume: 1.0);
   }
 
@@ -99,8 +89,11 @@ class Moonshiner extends FlameGame
       ),
       margin: const EdgeInsets.only(left: 32, bottom: 32),
     );
+
+    interactButton = Button();
+
     add(joyStick);
-    add(Button());
+    add(interactButton);
   }
 
   void updateControls() {
@@ -162,23 +155,49 @@ class Moonshiner extends FlameGame
   void loadLastlevel() {
     if (currentLevelindex > 0) {
       currentLevelindex--;
-      _loadLevel(currentLevelindex);
     } else {
       currentLevelindex = 0;
-      _loadLevel(currentLevelindex);
     }
+    _loadLevel(currentLevelindex);
   }
 
-  void _loadLevel(currentLevelindex) {
-    @override
+  void _loadLevel(int currentLevelindex) {
+    children.whereType<PositionComponent>().forEach((component) {
+      if (component != joyStick && component != interactButton) {
+        component.removeFromParent();
+      }
+    });
+
+    player = Player(character: 'Guy', position: Vector2(100, 100));
+    enemy = Enemy(
+      enemyCharacter: 'Mask Dude',
+      position: Vector2(200, 100),
+    );
+
     final world = Level(
-        levelName: levelNames[currentLevelindex], player: player, enemy: enemy);
+      levelName: levelNames[currentLevelindex],
+      player: player,
+      enemy: enemy,
+    );
 
     cam = CameraComponent.withFixedResolution(
-        world: world, width: 640, height: 360);
+      world: world,
+      width: 640,
+      height: 360,
+    );
     cam.priority = 1;
     cam.viewfinder.anchor = Anchor.topLeft;
 
     addAll([cam, world]);
+
+    if (!contains(joyStick) && showControls) {
+      add(joyStick);
+    }
+
+    if (!contains(interactButton) && showControls) {
+      add(interactButton);
+    }
+
+    playBackgroundMusicForLevel(levelNames[currentLevelindex]);
   }
 }

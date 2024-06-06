@@ -19,11 +19,11 @@ class Player extends SpriteAnimationGroupComponent
     with KeyboardHandler, HasGameRef<Moonshiner>, CollisionCallbacks {
   String character;
 
-  // ignore: use_super_parameters
   Player({
     position,
     this.character = 'Guy',
   }) : super(position: position);
+
   final double stepTime = 0.05;
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
@@ -52,14 +52,12 @@ class Player extends SpriteAnimationGroupComponent
   FutureOr<void> onLoad() {
     priority = 2;
     _loadAllAnimations();
-    // debugMode = true;
     add(RectangleHitbox(
         position: Vector2(hitbox.offsetX, hitbox.offsetY),
         size: Vector2(hitbox.width, hitbox.height)));
     return super.onLoad();
   }
 
-  // Method to handle player interaction
   void interact() {
     hasInteracted = true;
   }
@@ -132,7 +130,6 @@ class Player extends SpriteAnimationGroupComponent
     idleAnimation = _spriteAnimation('Idle', 11);
     runningAnimation = _spriteAnimation('Run', 12);
 
-    // list of all animations
     animations = {
       PlayerState.idle: idleAnimation,
       PlayerState.running: runningAnimation
@@ -159,8 +156,6 @@ class Player extends SpriteAnimationGroupComponent
     } else if (velocity.x > 0 && scale.x < 0) {
       flipHorizontallyAroundCenter();
     }
-
-    // check if moving, set running
 
     if ((velocity.x) > 0 || velocity.x < 0) {
       playerState = PlayerState.running;
