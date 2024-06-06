@@ -46,14 +46,6 @@ class Enemy extends SpriteAnimationGroupComponent
     size,
   }) : super(position: position);
 
-  List<String> dialogues = [
-    "Stay back!",
-    "This is my territory!",
-    "I won't let you pass!",
-    "You dare challenge me?"
-  ];
-  int currentDialogueIndex = 0;
-
   @override
   FutureOr<void> onLoad() {
     priority = 2;
@@ -95,42 +87,29 @@ class Enemy extends SpriteAnimationGroupComponent
     position: Vector2(100, 100), // Adjust position as needed
   );
 
+  List<String> dialogues = [
+    "Stay back!",
+    "This is my territory!",
+    "I won't let you pass!",
+    "You dare challenge me?"
+  ];
+  int currentDialogueIndex = 0;
+
+  bool hasDisplayedNewDialogue =
+      false; // Track if new dialogue has been displayed
+
   @override
   void update(double dt) {
-    // Check if the player is colliding with the enemy
+    // Handle enemy movement
     if (playerColliding) {
-      // If the player has interacted, update the message
-      if (playerHasInteracted) {
-        // Update the message for the next interaction
-        hudMessage.message = dialogues[currentDialogueIndex];
-        hudMessage.position = position + Vector2(0, -30);
-
-        // Add the message to the game if not already displayed
-        if (!messageDisplayed) {
-          gameRef.add(hudMessage);
-          messageDisplayed = true;
-        }
-
-        // Move to the next dialogue, loop back if at the end
-        currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
-
-        // Reset the interaction flag
-        playerHasInteracted = false;
-      }
+      current =
+          EnemyState.idle; // Stop enemy movement when colliding with player
     } else {
-      // If the player is not colliding, handle enemy movement and collision checks
       _updateEnemyMovement(dt);
-      _checkCollisions();
-
-      // Ensure the message is not displayed when the player is not colliding
-      if (messageDisplayed) {
-        gameRef.remove(hudMessage);
-        messageDisplayed = false;
-      }
     }
 
-    // Set the enemy state based on collision status
-    current = playerColliding ? EnemyState.idle : EnemyState.walking;
+    // Check collisions
+    _checkCollisions();
 
     super.update(dt);
   }
@@ -143,19 +122,24 @@ class Enemy extends SpriteAnimationGroupComponent
       // Check if the player has interacted
       if (other.hasInteracted) {
         playerHasInteracted = true;
-        other.hasInteracted = false; // Reset the interaction flag in Player
-
-        // Show a dialogue line
-        hudMessage.message = dialogues[currentDialogueIndex];
-        hudMessage.position = position + Vector2(0, -30);
-
-        if (!messageDisplayed) {
-          gameRef.add(hudMessage);
-          messageDisplayed = true;
-        }
 
         // Move to the next dialogue, loop back if at the end
         currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+
+        // Show the next dialogue message
+        hudMessage.message = dialogues[currentDialogueIndex];
+        hudMessage.position = position + Vector2(0, -30);
+
+        // Remove the previously displayed dialogue message
+        if (messageDisplayed) {
+          gameRef.remove(hudMessage);
+        }
+
+        // Add the new dialogue message to the game
+        gameRef.add(hudMessage);
+        messageDisplayed = true;
+
+        other.hasInteracted = false; // Reset the interaction flag in Player
       }
     }
     super.onCollision(intersectionPoints, other);
@@ -170,6 +154,7 @@ class Enemy extends SpriteAnimationGroupComponent
         gameRef.remove(hudMessage);
         messageDisplayed = false;
       }
+      current = EnemyState.walking;
     }
     super.onCollisionEnd(other);
   }

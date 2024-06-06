@@ -14,6 +14,7 @@ import 'package:moonshiner_game/moonshiner.dart';
 import 'door.dart';
 import 'enemy.dart';
 import 'itemTip.dart';
+import 'backdoor.dart';
 
 class Level extends World with HasGameRef<Moonshiner> {
   final String levelName;
@@ -52,6 +53,12 @@ class Level extends World with HasGameRef<Moonshiner> {
     }
   }
 
+  List<List<String>> enemyDialogues = [
+    ["Dialogue 1 for Enemy 1", "Dialogue 2 for Enemy 1"],
+    ["Dialogue 1 for Enemy 2", "Dialogue 2 for Enemy 2"],
+    // Add more lists of dialogues for each enemy spawn point
+  ];
+
   void _spawningObjects() {
     final spawnPointsLayer = level.tileMap.getLayer<ObjectGroup>('SpawnPoints');
 
@@ -73,6 +80,7 @@ class Level extends World with HasGameRef<Moonshiner> {
           case 'Enemy':
             enemy.enemyCharacter = 'Ninja Frog';
             enemy.position = Vector2(spawnPoint.x, spawnPoint.y);
+
             add(enemy);
             break;
           case 'Door':
@@ -80,6 +88,12 @@ class Level extends World with HasGameRef<Moonshiner> {
                 position: Vector2(spawnPoint.x, spawnPoint.y),
                 size: Vector2(spawnPoint.width, spawnPoint.height));
             add(door);
+            break;
+          case 'BackDoor':
+            final backdoor = Backdoor(
+                position: Vector2(spawnPoint.x, spawnPoint.y),
+                size: Vector2(spawnPoint.width, spawnPoint.height));
+            add(backdoor);
             break;
           default:
         }

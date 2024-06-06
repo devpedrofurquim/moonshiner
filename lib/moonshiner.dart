@@ -31,7 +31,9 @@ class Moonshiner extends FlameGame
   bool showControls = true;
   late CameraComponent cam;
   Player player = Player(character: 'Guy');
-  Enemy enemy = Enemy(enemyCharacter: 'Mask Dude');
+  Enemy enemy = Enemy(
+    enemyCharacter: 'Mask Dude',
+  );
   List<String> levelNames = ['Level-01', 'Level-02'];
   int currentLevelindex = 0;
   bool playSounds = false;
@@ -41,7 +43,7 @@ class Moonshiner extends FlameGame
     // load all images into cache
     await images.loadAllImages();
 
-    _loadLevel();
+    _loadLevel(currentLevelindex);
 
     if (showControls) {
       addControls();
@@ -154,10 +156,20 @@ class Moonshiner extends FlameGame
     } else {
       currentLevelindex = 0;
     }
-    _loadLevel();
+    _loadLevel(currentLevelindex);
   }
 
-  void _loadLevel() {
+  void loadLastlevel() {
+    if (currentLevelindex > 0) {
+      currentLevelindex--;
+      _loadLevel(currentLevelindex);
+    } else {
+      currentLevelindex = 0;
+      _loadLevel(currentLevelindex);
+    }
+  }
+
+  void _loadLevel(currentLevelindex) {
     @override
     final world = Level(
         levelName: levelNames[currentLevelindex], player: player, enemy: enemy);

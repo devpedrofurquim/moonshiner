@@ -11,6 +11,7 @@ import 'package:moonshiner_game/moonshiner.dart';
 
 import 'collision_block.dart';
 import 'door.dart';
+import 'backdoor.dart';
 
 enum PlayerState { idle, running }
 
@@ -94,6 +95,12 @@ class Player extends SpriteAnimationGroupComponent
     if (other is Door && hasInteracted) {
       if (!reacheDoor) {
         _reachedDoor();
+      }
+      hasInteracted = false;
+    }
+    if (other is Backdoor && hasInteracted) {
+      if (!reacheDoor) {
+        _reachedBackDoor();
       }
       hasInteracted = false;
     }
@@ -211,7 +218,14 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void _reachedDoor() {
+    print('Reached Door');
     reacheDoor = true;
     game.loadNextLevel();
+  }
+
+  void _reachedBackDoor() {
+    print('Reached Back Door');
+    reacheDoor = true;
+    game.loadLastlevel();
   }
 }
