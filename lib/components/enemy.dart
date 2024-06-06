@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:moonshiner_game/components/custom_hitbox.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/components/utils.dart';
 import 'package:moonshiner_game/moonshiner.dart';
-
 import 'collision_block.dart';
 import 'hud.dart';
 
@@ -28,6 +26,8 @@ class Enemy extends SpriteAnimationGroupComponent
   final double proximityThreshold =
       100; // Adjust this value based on your game's scale
   bool playerColliding = false; // Flag to track player collision
+  bool playerHasInteracted = false;
+  bool messageDisplayed = false; // Flag to track if the message is displayed
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation walkingAnimation;
   List<CollisionBlock> collisionBlocks = [];
@@ -45,6 +45,14 @@ class Enemy extends SpriteAnimationGroupComponent
     this.enemyCharacter = 'Mask Dude',
     size,
   }) : super(position: position);
+
+  List<String> dialogues = [
+    "Stay back!",
+    "This is my territory!",
+    "I won't let you pass!",
+    "You dare challenge me?"
+  ];
+  int currentDialogueIndex = 0;
 
   @override
   FutureOr<void> onLoad() {
@@ -89,20 +97,39 @@ class Enemy extends SpriteAnimationGroupComponent
 
   @override
   void update(double dt) {
+    // Check if the player is colliding with the enemy
     if (playerColliding) {
-      if (!isMessage) {
-        gameRef.add(hudMessage);
-        isMessage = true;
-      } else {
+      // If the player has interacted, update the message
+      if (playerHasInteracted) {
+        // Update the message for the next interaction
+        hudMessage.message = dialogues[currentDialogueIndex];
+        hudMessage.position = position + Vector2(0, -30);
+
+        // Add the message to the game if not already displayed
+        if (!messageDisplayed) {
+          gameRef.add(hudMessage);
+          messageDisplayed = true;
+        }
+
+        // Move to the next dialogue, loop back if at the end
+        currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+
+        // Reset the interaction flag
+        playerHasInteracted = false;
+      }
+    } else {
+      // If the player is not colliding, handle enemy movement and collision checks
+      _updateEnemyMovement(dt);
+      _checkCollisions();
+
+      // Ensure the message is not displayed when the player is not colliding
+      if (messageDisplayed) {
         gameRef.remove(hudMessage);
-        isMessage = false;
+        messageDisplayed = false;
       }
     }
 
-    if (!playerColliding) {
-      _updateEnemyMovement(dt);
-      _checkCollisions();
-    }
+    // Set the enemy state based on collision status
     current = playerColliding ? EnemyState.idle : EnemyState.walking;
 
     super.update(dt);
@@ -112,10 +139,24 @@ class Enemy extends SpriteAnimationGroupComponent
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player) {
       playerColliding = true;
-      // Set the message to display the name of the character
-      hudMessage.message = "Beware! $enemyCharacter Ahead!";
-      hudMessage.position = position + Vector2(0, -30);
-      gameRef.add(hudMessage);
+
+      // Check if the player has interacted
+      if (other.hasInteracted) {
+        playerHasInteracted = true;
+        other.hasInteracted = false; // Reset the interaction flag in Player
+
+        // Show a dialogue line
+        hudMessage.message = dialogues[currentDialogueIndex];
+        hudMessage.position = position + Vector2(0, -30);
+
+        if (!messageDisplayed) {
+          gameRef.add(hudMessage);
+          messageDisplayed = true;
+        }
+
+        // Move to the next dialogue, loop back if at the end
+        currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+      }
     }
     super.onCollision(intersectionPoints, other);
   }
@@ -125,7 +166,10 @@ class Enemy extends SpriteAnimationGroupComponent
     if (other is Player) {
       playerColliding = false; // Reset flag when player collision ends
       // Remove message from the game
-      gameRef.remove(hudMessage);
+      if (messageDisplayed) {
+        gameRef.remove(hudMessage);
+        messageDisplayed = false;
+      }
     }
     super.onCollisionEnd(other);
   }

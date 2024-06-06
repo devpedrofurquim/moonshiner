@@ -34,6 +34,7 @@ class Player extends SpriteAnimationGroupComponent
     width: 14,
   );
   bool reacheDoor = false;
+  bool reachedEnemy = false;
   double horizontalMovement = 0;
   double verticalMovement = 0;
   double moveSpeed = 50;
@@ -55,6 +56,11 @@ class Player extends SpriteAnimationGroupComponent
         position: Vector2(hitbox.offsetX, hitbox.offsetY),
         size: Vector2(hitbox.width, hitbox.height)));
     return super.onLoad();
+  }
+
+  // Method to handle player interaction
+  void interact() {
+    hasInteracted = true;
   }
 
   @override
@@ -98,7 +104,7 @@ class Player extends SpriteAnimationGroupComponent
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is ItemTip) other.collidingWithPlayer();
-    if (other is Enemy) other.collidingWithPlayer();
+    if (other is Enemy && hasInteracted) other.collidingWithPlayer();
     super.onCollisionStart(intersectionPoints, other);
   }
 
