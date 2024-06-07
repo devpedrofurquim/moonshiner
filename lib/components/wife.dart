@@ -1,78 +1,180 @@
+import 'dart:async';
+
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 import 'dart:math';
 
-class Wife extends SpriteAnimationGroupComponent with HasGameRef<Moonshiner> {
-  late final Player player;
-  Vector2 velocity = Vector2.zero();
-  double speed = 50; // Decreased speed to make her move more carefully
-  bool facingRight = false;
+import 'custom_hitbox.dart';
+import 'hud.dart';
 
-  Wife({required this.player}) {
+class Wife extends SpriteAnimationGroupComponent
+    with HasGameRef<Moonshiner>, CollisionCallbacks {
+  String character;
+  late final Player player;
+  late SpriteAnimation idleAnimation;
+  late SpriteAnimation runningAnimation;
+  final double stepTime = 0.05;
+  bool playerColliding = false; // Flag to track player collision
+  bool playerHasInteracted = false;
+  bool messageDisplayed = false; // Flag to track if the message is displayed
+  Vector2 velocity = Vector2.zero();
+  double speed = 50; // Speed of the wife
+  bool facingRight = true;
+  double minDistance =
+      50; // Minimum distance she should maintain from the player
+
+  CustomHitbox hitbox = CustomHitbox(
+    offsetX: 10,
+    offsetY: 4,
+    height: 28,
+    width: 14,
+  );
+
+  Wife({
+    required this.player,
+    this.character = 'Mask Dude',
+  }) {
     // Set the initial position of the wife
     position = Vector2.all(100); // Change the initial position as needed
-
-    // Share player's animations with the wife
-    animations = player.animations;
-    current = player.current;
   }
+
+  @override
+  Future<void> onLoad() async {
+    priority = 2;
+    await _loadAllAnimations();
+    add(RectangleHitbox(
+        position: Vector2(hitbox.offsetX, hitbox.offsetY),
+        size: Vector2(hitbox.width, hitbox.height)));
+    return super.onLoad();
+  }
+
+  bool isMessage = false; // Declare a variable to store the HUDMessage
+
+  HUDMessage hudMessage = HUDMessage(
+    message: "Hello!",
+    position: Vector2(100, 100), // Adjust position as needed
+  );
+
+  List<String> dialogues = [
+    "I really love you darling!",
+    "What are you thinking about?",
+    "I'm tired! Need rest",
+    "Do you want to eat something?"
+  ];
+  int currentDialogueIndex = 0;
+
+  bool hasDisplayedNewDialogue =
+      false; // Track if new dialogue has been displayed
 
   @override
   void update(double dt) {
     // Calculate direction vector towards the player
     final Vector2 playerPosition = player.position;
-    final Vector2 wifePosition = position;
-    final Vector2 direction = playerPosition - wifePosition;
+    final Vector2 direction = playerPosition - position;
 
-    // Normalize the direction vector
-    if (direction.length > 0) {
+    // Calculate the distance to the player
+    final double distanceToPlayer = direction.length;
+
+    // Normalize the direction vector if she is farther than the minimum distance
+    if (distanceToPlayer > minDistance) {
       direction.normalize();
 
       // Calculate desired velocity
       final desiredVelocity = direction * speed;
 
-      // Apply the velocity gradually to smooth out the movement
-      final acceleration = (desiredVelocity - velocity) * 10 * dt;
-      velocity += acceleration;
+      // Smooth out the movement by interpolating velocity
+      velocity += (desiredVelocity - velocity) * 10 * dt;
 
-      // Update wife's current animation to match player's animation
-      current = player.current;
+      // Update wife's position
+      position += velocity * dt;
 
-      // Adjust wife's position to be beside the player
-      final offset = player.scale.x > 0 ? Vector2(30, 0) : Vector2(-30, 0);
-      final targetPosition = player.position - offset;
+      // Set animation to walking
+      current = PlayerState.running;
 
-      // Calculate the distance between the wife and the target position
-      final distanceToTarget = (targetPosition - position).length;
-
-      // If the wife is not yet close to the target position, move her towards it
-      if (distanceToTarget > 1) {
-        // Calculate the movement vector towards the target position
-        final moveVector = (targetPosition - position).normalized();
-
-        // Calculate the movement speed based on the distance to the target
-        final moveSpeed = min(speed * dt, distanceToTarget);
-
-        // Apply the movement vector with the calculated speed
-        position += moveVector * moveSpeed;
-      }
-
-      // Determine the direction the player is facing based on velocity and scale
+      // Determine the direction the player is facing
       bool playerFacingRight = player.velocity.x >= 0;
 
       // Flip horizontally if necessary based on wife's position relative to the player
-      if (playerFacingRight && !facingRight && position.x > player.position.x) {
-        flipHorizontallyAroundCenter();
-        facingRight = false;
-      } else if (!playerFacingRight &&
-          facingRight &&
-          position.x < player.position.x) {
+      if (playerFacingRight && !facingRight) {
         flipHorizontallyAroundCenter();
         facingRight = true;
+      } else if (!playerFacingRight && facingRight) {
+        flipHorizontallyAroundCenter();
+        facingRight = false;
       }
+    } else {
+      // If she is within the minimum distance, stop moving and switch to idle animation
+      velocity = Vector2.zero();
+      current = PlayerState.idle;
     }
 
     super.update(dt);
+  }
+
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (other is Player) {
+      playerColliding = true;
+
+      // Check if the player has interacted
+      if (other.hasInteracted) {
+        playerHasInteracted = true;
+
+        // Move to the next dialogue, loop back if at the end
+        currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+
+        // Show the next dialogue message
+        hudMessage.message = dialogues[currentDialogueIndex];
+        hudMessage.position = position + Vector2(0, -30);
+
+        // Remove the previously displayed dialogue message
+        if (messageDisplayed) {
+          gameRef.remove(hudMessage);
+        }
+
+        // Add the new dialogue message to the game
+        gameRef.add(hudMessage);
+        messageDisplayed = true;
+
+        other.hasInteracted = false; // Reset the interaction flag in Player
+      }
+    }
+    super.onCollision(intersectionPoints, other);
+  }
+
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    if (other is Player) {
+      playerColliding = false; // Reset flag when player collision ends
+      // Remove message from the game
+      if (messageDisplayed) {
+        gameRef.remove(hudMessage);
+        messageDisplayed = false;
+      }
+    }
+    super.onCollisionEnd(other);
+  }
+
+  Future<void> _loadAllAnimations() async {
+    idleAnimation = await _spriteAnimation('Idle', 11);
+    runningAnimation = await _spriteAnimation('Run', 12);
+
+    animations = {
+      PlayerState.idle: idleAnimation,
+      PlayerState.running: runningAnimation
+    };
+
+    current = PlayerState.running;
+  }
+
+  Future<SpriteAnimation> _spriteAnimation(String state, int amount) async {
+    return SpriteAnimation.fromFrameData(
+        game.images.fromCache('Main Characters/$character/$state (32x32).png'),
+        SpriteAnimationData.sequenced(
+          amount: amount,
+          stepTime: stepTime,
+          textureSize: Vector2.all(32),
+        ));
   }
 }
