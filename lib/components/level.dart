@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:moonshiner_game/components/background_tile.dart';
 import 'package:moonshiner_game/components/collision_block.dart';
 import 'package:moonshiner_game/components/player.dart';
+import 'package:moonshiner_game/components/wife.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 
 import 'door.dart';
@@ -69,6 +70,11 @@ class Level extends World with HasGameRef<Moonshiner> {
             player.position = Vector2(spawnPoint.x, spawnPoint.y);
             player.scale.x = 1;
             add(player);
+            break;
+          case 'Wife': // Add case for spawning the wife
+            final wife = Wife(player: player);
+            wife.position = Vector2(spawnPoint.x, spawnPoint.y);
+            add(wife);
             break;
           case 'Objects':
             final itemTip = ItemTip(
@@ -132,6 +138,16 @@ class Level extends World with HasGameRef<Moonshiner> {
                 isPlayer: true);
             collisionBlocks.add(player);
             add(player);
+            break;
+          case 'Wife': // Add collision block for the wife
+            final wifeBlock = CollisionBlock(
+              position: Vector2(collision.x, collision.y),
+              size: Vector2(collision.width, collision.height),
+              isPlayer:
+                  true, // Assuming the wife should interact with player collision blocks
+            );
+            collisionBlocks.add(wifeBlock);
+            add(wifeBlock);
             break;
           default:
             final block = CollisionBlock(
