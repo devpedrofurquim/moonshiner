@@ -1,5 +1,5 @@
 name: moonshiner_game
-description: "A new Flutter project."
+description: 'A new Flutter project.'
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -31,13 +31,14 @@ dependencies:
   build_runner: ^2.0.4
   flutter:
     sdk: flutter
-  flame_audio: ^1.0.0
+  flame_audio: ^2.10.5
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   flame: ^1.16.0
   flame_tiled: ^1.19.0
+  audioplayers: ^6.0.0 # Use a version compatible with `flame_audio`
 
 dev_dependencies:
   flutter_test:
@@ -56,7 +57,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -73,6 +73,7 @@ flutter:
     - assets/images/Main Characters/Mask Dude/
     - assets/images/Main Characters/Ninja Frog/
     - assets/images/Main Characters/Pink Man/
+    - assets/images/Main Characters/Journal Guy/
     - assets/images/Main Characters/Virtual Guy/
     - assets/images/Main Characters/Guy/
     - assets/images/HUD/
@@ -83,9 +84,8 @@ flutter:
     - assets/audio/moonshine_ost.mp3
     - assets/audio/the_farewell_ost.wav
     - assets/images/Items/Checkpoints/Checkpoint/
-
-
-
+    - assets/audio/the_farewell_ost.wav
+    - assets/audio/moonshine_ost.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

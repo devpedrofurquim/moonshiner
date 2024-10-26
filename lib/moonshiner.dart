@@ -4,13 +4,13 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/painting.dart';
 import 'package:moonshiner_game/components/button.dart';
-import 'package:moonshiner_game/components/level.dart';
+import 'package:moonshiner_game/components/developer_message.dart';
+import 'package:moonshiner_game/components/level_one.dart';
+import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/components/player.dart';
-import 'package:flame/input.dart';
-import 'package:flutter/material.dart';
-import 'components/enemy.dart';
+import 'package:moonshiner_game/components/level.dart'; // Use Level directly
 import 'components/hud.dart';
 
 class Moonshiner extends FlameGame
@@ -19,185 +19,212 @@ class Moonshiner extends FlameGame
         DragCallbacks,
         HasCollisionDetection,
         TapCallbacks {
+  // UI Components
+  late JoystickComponent joyStick;
+  late Button interactButton;
+  List<NPC> activeNpcs = []; // Track active NPCs in the current level
   late HUDMessage hudMessage;
+
+  bool hasShownLevelOneIntro =
+      false; // Track if LevelOne intro message has been shown
+
+  // Game State Variables
+  bool showControls = true;
+  bool playSounds = true;
+  double soundVolume = 1.0;
+
+  String developerMessage =
+      ''; // Shared variable to store the developer message
+
+  // Player and Camera Components
+  late CameraComponent cam;
+  Player player = Player(character: 'Guy');
+
+  // Level Management
+  List<String> levelNames = ['Level-01', 'Level-02'];
+  int currentLevelIndex = 0;
 
   @override
   Color backgroundColor() => const Color(0xFF211F30);
 
-  late JoystickComponent joyStick;
-  late Button interactButton;
-
-  bool showControls = true;
-  late CameraComponent cam;
-
-  Player player = Player(character: 'Guy');
-  Enemy enemy = Enemy(
-    enemyCharacter: 'Mask Dude',
-  );
-
-  List<String> levelNames = ['Level-01', 'Level-02'];
-  int currentLevelindex = 0;
-  bool playSounds = false;
-  double soundVolume = 1.0;
-
   @override
-  FutureOr<void> onLoad() async {
+  Future<void> onLoad() async {
     await images.loadAllImages();
-    addControls();
-    _loadLevel(currentLevelindex);
+    _initializeControls();
+
+    FlameAudio.bgm.initialize(); // This will set up the background music system
+
+    // Directly load the initial level and set up the camera
+    _loadLevel(currentLevelIndex);
     return super.onLoad();
   }
 
-  void playBackgroundMusicForLevel(String levelName) {
-    FlameAudio.bgm.stop();
-    String musicFileName;
-    switch (levelName) {
-      case 'Level-01':
-        musicFileName = 'the_farewell_ost.wav';
-        break;
-      case 'Level-02':
-        musicFileName = 'moonshine_ost.mp3';
-        break;
-      default:
-        musicFileName = 'default_music.mp3';
-        break;
-    }
-    FlameAudio.bgm.play(musicFileName, volume: 1.0);
+  void showDeveloperMessage(String message) {
+    print("showDeveloperMessage called with message: $message");
+
+    // Remove any existing message to prevent duplicates
+    children.removeWhere((component) => component is DeveloperMessageComponent);
+
+    final developerMessageComponent = DeveloperMessageComponent(
+      message: message,
+    )..priority = 100; // Set a high priority to render above other components
+
+    add(developerMessageComponent);
+    developerMessageComponent
+        .showWithTimeout(Duration(seconds: 4)); // Display for 4 seconds
+
+    print("Developer message added to the game.");
   }
 
-  @override
-  void update(double dt) {
-    if (showControls) {
-      updateControls();
-    }
-    super.update(dt);
+  // Method to hide the developer message overlay
+  void hideDeveloperMessage() {
+    overlays.remove('DeveloperMessage'); // Remove the overlay
   }
 
-  void addControls() {
-    joyStick = JoystickComponent(
-      priority: 2,
-      knob: SpriteComponent(
-        sprite: Sprite(
-          images.fromCache('HUD/knob.png'),
-        ),
-      ),
-      knobRadius: 32,
-      background: SpriteComponent(
-        sprite: Sprite(
-          images.fromCache('HUD/joystick.png'),
-        ),
-      ),
-      margin: const EdgeInsets.only(left: 32, bottom: 32),
-    );
-
-    interactButton = Button();
-
-    add(joyStick);
-    add(interactButton);
+  void _setupCamera(Level level) {
+    cam = CameraComponent.withFixedResolution(
+      world: level, // Directly set the current level as the world
+      width: 640,
+      height: 360,
+    )
+      ..priority = 1
+      ..viewfinder.anchor = Anchor.topLeft;
+    add(cam);
   }
 
-  void updateControls() {
-    switch (joyStick.direction) {
-      case JoystickDirection.left:
-        player.horizontalMovement = -1;
-        break;
-      case JoystickDirection.right:
-        player.horizontalMovement = 1;
-        break;
-      case JoystickDirection.downRight:
-        player.horizontalMovement = 1;
-        player.verticalMovement = 1;
-        break;
-      case JoystickDirection.downLeft:
-        player.horizontalMovement = -1;
-        player.verticalMovement = 1;
-        break;
-      case JoystickDirection.down:
-        player.verticalMovement = 1;
-        break;
-      case JoystickDirection.up:
-        player.verticalMovement = -1;
-        break;
-      case JoystickDirection.upRight:
-        player.horizontalMovement = 1;
-        player.verticalMovement = -1;
-        break;
-      case JoystickDirection.upLeft:
-        player.horizontalMovement = -1;
-        player.verticalMovement = -1;
-        break;
-      default:
-        player.horizontalMovement = 0;
-        player.verticalMovement = 0;
-        break;
-    }
-  }
-
-  @override
-  void pause() {
-    pauseEngine();
-  }
-
-  @override
-  void resume() {
-    resumeEngine();
-  }
-
-  void loadNextLevel() {
-    if (currentLevelindex < levelNames.length - 1) {
-      currentLevelindex++;
-    } else {
-      currentLevelindex = 0;
-    }
-    _loadLevel(currentLevelindex);
-  }
-
-  void loadLastlevel() {
-    if (currentLevelindex > 0) {
-      currentLevelindex--;
-    } else {
-      currentLevelindex = 0;
-    }
-    _loadLevel(currentLevelindex);
-  }
-
-  void _loadLevel(int currentLevelindex) {
+  void _loadLevel(int index) {
+    // Remove existing components except joystick and interact button
     children.whereType<PositionComponent>().forEach((component) {
       if (component != joyStick && component != interactButton) {
         component.removeFromParent();
       }
     });
 
+    // Initialize player and set position
     player = Player(character: 'Guy', position: Vector2(100, 100));
-    enemy = Enemy(
-      enemyCharacter: 'Mask Dude',
-      position: Vector2(200, 100),
-    );
 
-    final world = Level(
-      levelName: levelNames[currentLevelindex],
-      player: player,
-      enemy: enemy,
-    );
+    late final level;
 
-    cam = CameraComponent.withFixedResolution(
-      world: world,
-      width: 640,
-      height: 360,
-    );
-    cam.priority = 1;
-    cam.viewfinder.anchor = Anchor.topLeft;
-
-    addAll([cam, world]);
-
-    if (!contains(joyStick) && showControls) {
-      add(joyStick);
+    // Create new level instance
+    if (index == 0) {
+      level = LevelOne(
+        levelName: levelNames[index],
+        player: player,
+      );
+    } else {
+      level = Level(
+        levelName: levelNames[index],
+        player: player,
+      );
     }
 
-    if (!contains(interactButton) && showControls) {
-      add(interactButton);
+    // Set up the camera for the new level and add level to the game
+    _setupCamera(level);
+    add(level);
+
+    playBackgroundMusicForLevel(levelNames[index]);
+  }
+
+  // Music Control for Level
+  void playBackgroundMusicForLevel(String levelName) {
+    final musicFileName = switch (levelName) {
+      'Level-01' => 'the_farewell_ost.wav',
+      'Level-02' => 'moonshine_ost.mp3',
+      _ => 'default_music.mp3',
+    };
+    playBackgroundMusic(musicFileName);
+  }
+
+  void playBackgroundMusic(String fileName) async {
+    try {
+      // Stop any currently playing background music
+      await FlameAudio.bgm.stop();
+
+      // Play the audio file without the volume parameter
+      await FlameAudio.bgm.play(fileName);
+    } catch (e) {
+      print("Error playing background music: $e");
+    }
+  }
+
+  @override
+  void update(double dt) {
+    if (showControls) {
+      _updateControls();
+    }
+    super.update(dt);
+  }
+
+  // Adding Controls to the Game
+  void _initializeControls() {
+    joyStick = JoystickComponent(
+      priority: 2,
+      knob: SpriteComponent(sprite: Sprite(images.fromCache('HUD/knob.png'))),
+      knobRadius: 32,
+      background:
+          SpriteComponent(sprite: Sprite(images.fromCache('HUD/joystick.png'))),
+      margin: const EdgeInsets.only(left: 32, bottom: 32),
+    );
+
+    interactButton = Button();
+    add(joyStick);
+    add(interactButton);
+  }
+
+  // Updating Controls Based on Joystick Input
+  void _updateControls() {
+    double horizontalMovement = 0;
+    double verticalMovement = 0;
+
+    switch (joyStick.direction) {
+      case JoystickDirection.left:
+        horizontalMovement = -1;
+        break;
+      case JoystickDirection.right:
+        horizontalMovement = 1;
+        break;
+      case JoystickDirection.up:
+        verticalMovement = -1;
+        break;
+      case JoystickDirection.down:
+        verticalMovement = 1;
+        break;
+      case JoystickDirection.downRight:
+        horizontalMovement = 1;
+        verticalMovement = 1;
+        break;
+      case JoystickDirection.downLeft:
+        horizontalMovement = -1;
+        verticalMovement = 1;
+        break;
+      case JoystickDirection.upRight:
+        horizontalMovement = 1;
+        verticalMovement = -1;
+        break;
+      case JoystickDirection.upLeft:
+        horizontalMovement = -1;
+        verticalMovement = -1;
+        break;
+      default:
+        horizontalMovement = 0;
+        verticalMovement = 0;
+        break;
     }
 
-    playBackgroundMusicForLevel(levelNames[currentLevelindex]);
+    player.horizontalMovement = horizontalMovement;
+    player.verticalMovement = verticalMovement;
+  }
+
+  // Loading Next and Previous Levels
+  Future<void> loadNextLevel() async {
+    currentLevelIndex = (currentLevelIndex + 1) % levelNames.length;
+    _loadLevel(currentLevelIndex);
+  }
+
+  Future<void> loadPreviousLevel() async {
+    if (currentLevelIndex > 0) {
+      currentLevelIndex--;
+      _loadLevel(currentLevelIndex);
+    }
   }
 }

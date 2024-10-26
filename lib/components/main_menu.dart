@@ -16,7 +16,17 @@ class _MainMenuState extends State<MainMenu> {
   @override
   void initState() {
     super.initState();
-    FlameAudio.bgm.play('main_menu_music.mp3', volume: 1.0);
+    playBackgroundMusic('main_menu_music.mp3');
+  }
+
+  Future<void> playBackgroundMusic(String fileName) async {
+    try {
+      await Future.delayed(Duration(milliseconds: 100)); // Add a small delay
+      await FlameAudio.bgm.stop();
+      await FlameAudio.bgm.play(fileName);
+    } catch (e) {
+      print("Error playing background music: $e");
+    }
   }
 
   @override

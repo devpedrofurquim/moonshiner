@@ -1,10 +1,9 @@
 import 'dart:async';
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 import 'package:moonshiner_game/components/custom_hitbox.dart';
-import 'package:moonshiner_game/components/enemy.dart';
+import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/components/itemTip.dart';
 import 'package:moonshiner_game/components/utils.dart';
 import 'package:moonshiner_game/moonshiner.dart';
@@ -25,6 +24,7 @@ class Player extends SpriteAnimationGroupComponent
   }) : super(position: position);
 
   final double stepTime = 0.05;
+  VoidCallback? onLevelTransition;
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
   bool isOnGround = false;
@@ -34,8 +34,7 @@ class Player extends SpriteAnimationGroupComponent
     height: 28,
     width: 14,
   );
-  bool reacheDoor = false;
-  bool reachedEnemy = false;
+  bool reachedDoor = false;
   double horizontalMovement = 0;
   double verticalMovement = 0;
   double moveSpeed = 50;
@@ -91,13 +90,13 @@ class Player extends SpriteAnimationGroupComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Door && hasInteracted) {
-      if (!reacheDoor) {
+      if (!reachedDoor) {
         _reachedDoor();
       }
       hasInteracted = false;
     }
     if (other is Backdoor && hasInteracted) {
-      if (!reacheDoor) {
+      if (!reachedDoor) {
         _reachedBackDoor();
       }
       hasInteracted = false;
@@ -109,7 +108,7 @@ class Player extends SpriteAnimationGroupComponent
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is ItemTip) other.collidingWithPlayer();
-    if (other is Enemy && hasInteracted) other.collidingWithPlayer();
+    if (other is NPC && hasInteracted) other.collidingWithPlayer();
     super.onCollisionStart(intersectionPoints, other);
   }
 
@@ -157,9 +156,7 @@ class Player extends SpriteAnimationGroupComponent
       flipHorizontallyAroundCenter();
     }
 
-    if ((velocity.x) > 0 || velocity.x < 0) {
-      playerState = PlayerState.running;
-    } else if (velocity.y > 0 || velocity.y < 0) {
+    if (velocity.x.abs() > 0 || velocity.y.abs() > 0) {
       playerState = PlayerState.running;
     } else {
       playerState = PlayerState.idle;
@@ -214,13 +211,22 @@ class Player extends SpriteAnimationGroupComponent
 
   void _reachedDoor() {
     print('Reached Door');
-    reacheDoor = true;
-    game.loadNextLevel();
+    reachedDoor = true;
+    onLevelTransition?.call();
+    _resetDoorState();
   }
 
   void _reachedBackDoor() {
     print('Reached Back Door');
-    reacheDoor = true;
-    game.loadLastlevel();
+    reachedDoor = true;
+    game.loadPreviousLevel();
+    _resetDoorState();
+  }
+
+  void _resetDoorState() {
+    // Reset the reachedDoor flag after a small delay to avoid double triggers
+    Future.delayed(Duration(milliseconds: 500), () {
+      reachedDoor = false;
+    });
   }
 }

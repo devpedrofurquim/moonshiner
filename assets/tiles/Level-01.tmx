@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="32">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="40" height="23" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="32">
  <tileset firstgid="1" name="Moonshiner" tilewidth="16" tileheight="16" tilecount="242" columns="22">
   <image source="../images/Terrain/Terrain (16x16).png" width="352" height="176"/>
  </tileset>
@@ -40,18 +40,11 @@
   <object id="14" name="Lamp" type="Objects" x="128" y="224" width="32" height="32"/>
   <object id="17" name="Paper" type="Objects" x="224" y="224" width="32" height="32"/>
   <object id="18" name="Gun" type="Objects" x="64" y="224" width="32" height="32"/>
-  <object id="26" name="Enemy" type="Enemy" x="320" y="224" width="32" height="32">
+  <object id="26" name="Baker" type="NPC" x="320" y="224" width="32" height="32">
    <properties>
     <property name="isVertical" type="bool" value="false"/>
     <property name="offPos" type="float" value="8"/>
     <property name="offSetN" type="float" value="7"/>
-   </properties>
-  </object>
-  <object id="27" name="Enemy" type="Enemy" x="400" y="224" width="32" height="32">
-   <properties>
-    <property name="isVertical" type="bool" value="false"/>
-    <property name="offPos" type="float" value="3"/>
-    <property name="offSetN" type="float" value="4"/>
    </properties>
   </object>
   <object id="29" name="Door" type="Door" x="416" y="144" width="48" height="64"/>
