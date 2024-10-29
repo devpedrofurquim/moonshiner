@@ -23,7 +23,7 @@ class Moonshiner extends FlameGame
   // UI Components
   late JoystickComponent joyStick;
   late Button interactButton;
-  List<NPC> activeNpcs = []; // Track active NPCs in the current level
+  List<AbstractNPC> activeNpcs = []; // Track active NPCs in the current level
   late HUDMessage hudMessage;
 
   bool hasShownLevelOneIntro =

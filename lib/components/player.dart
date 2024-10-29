@@ -58,7 +58,8 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void interact() {
-    hasInteracted = true;
+    hasInteracted = true; // This sets up interaction
+    print("Player interaction activated.");
   }
 
   @override
@@ -107,8 +108,9 @@ class Player extends SpriteAnimationGroupComponent
   @override
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other is ItemTip) other.collidingWithPlayer();
-    if (other is NPC && hasInteracted) other.collidingWithPlayer();
+    if (other is ItemTip) {
+      other.collidingWithPlayer();
+    }
     super.onCollisionStart(intersectionPoints, other);
   }
 

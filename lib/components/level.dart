@@ -3,8 +3,12 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:moonshiner_game/components/background_tile.dart';
+import 'package:moonshiner_game/components/baker.dart';
 import 'package:moonshiner_game/components/collision_block.dart';
+import 'package:moonshiner_game/components/journalGuy.dart';
+import 'package:moonshiner_game/components/oldLady.dart';
 import 'package:moonshiner_game/components/player.dart';
+import 'package:moonshiner_game/components/priest.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 import 'npc.dart';
 import 'door.dart';
@@ -15,7 +19,7 @@ import 'wife.dart';
 class Level extends World with HasGameRef<Moonshiner> {
   final String levelName;
   final Player player;
-  List<NPC> npcs = [];
+  List<AbstractNPC> npcs = [];
   late TiledComponent level;
   List<CollisionBlock> collisionBlocks = [];
 
@@ -97,55 +101,20 @@ class Level extends World with HasGameRef<Moonshiner> {
             add(wife);
             break;
           case 'NPC':
-            NPC npc;
+            AbstractNPC npc;
             final npcType = spawnPoint.name;
 
+            // Instantiate the specific NPC based on the name
             if (npcType == 'Priest') {
-              npc = NPC(
-                npcCharacter: 'Priest',
-                dialogues: [
-                  "The Lord sees all.",
-                  "Bless you, my child.",
-                  "Evil lurks in strange places."
-                ],
-                position: position,
-              );
+              npc = Priest(position: position);
             } else if (npcType == 'Baker') {
-              npc = NPC(
-                npcCharacter: 'Baker',
-                dialogues: [
-                  "Fresh bread today!",
-                  "A hard day’s work, but worth it.",
-                  "Care for a slice?"
-                ],
-                position: position,
-              );
+              npc = Baker(position: position);
             } else if (npcType == 'Old Lady') {
-              npc = NPC(
-                npcCharacter: 'Old Lady',
-                dialogues: [
-                  "In my day, things were different.",
-                  "I’ve lived here my whole life.",
-                  "Be careful, dear."
-                ],
-                position: position,
-              );
+              npc = OldLady(position: position);
             } else if (npcType == 'Journal Guy') {
-              npc = NPC(
-                npcCharacter: 'Journal Guy',
-                dialogues: [
-                  "News of the day! Get your news here!",
-                  "Rumor has it, strange things are happening.",
-                  "Can’t keep secrets in this town."
-                ],
-                position: position,
-              );
+              npc = JournalGuy(position: position);
             } else {
-              npc = NPC(
-                npcCharacter: 'Wanderer',
-                dialogues: ["I'm just here, wandering around."],
-                position: position,
-              );
+              npc = Baker(position: position); // Default NPC
             }
 
             npc.collisionBlocks = collisionBlocks;
