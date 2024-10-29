@@ -17,7 +17,7 @@ class NPC extends SpriteAnimationGroupComponent
   final List<String> dialogues; // Unique dialogues for each NPC type
   double moveSpeed = 50;
   Vector2 velocity = Vector2.zero();
-  Vector2 initialPosition; // Define initialPosition
+  Vector2 initialPosition;
   CustomHitbox hitbox = CustomHitbox(
     offsetX: 10,
     offsetY: 4,
@@ -44,7 +44,7 @@ class NPC extends SpriteAnimationGroupComponent
     position: Vector2(100, 100),
   );
 
-  Timer? randomDialogueTimer; // Timer for random dialogues
+  Timer? randomDialogueTimer;
 
   NPC({
     required this.npcCharacter,
@@ -74,7 +74,7 @@ class NPC extends SpriteAnimationGroupComponent
 
   @override
   void onRemove() {
-    randomDialogueTimer?.stop(); // Stop the timer when NPC is removed
+    randomDialogueTimer?.stop();
     super.onRemove();
   }
 
@@ -104,7 +104,7 @@ class NPC extends SpriteAnimationGroupComponent
   @override
   void update(double dt) {
     super.update(dt);
-    randomDialogueTimer?.update(dt); // Update the random dialogue timer
+    randomDialogueTimer?.update(dt);
 
     final Vector2 currentPlayerPosition = gameRef.player.position;
     final double distanceToPlayer = currentPlayerPosition.distanceTo(position);
@@ -122,16 +122,20 @@ class NPC extends SpriteAnimationGroupComponent
   }
 
   void _triggerRandomDialogue() {
-    if (!playerColliding && !messageDisplayed) {
+    if (!gameRef.currentlySpeakingNPC &&
+        !playerColliding &&
+        !messageDisplayed) {
       hudMessage.message = dialogues[Random().nextInt(dialogues.length)];
       hudMessage.position = position + Vector2(0, -30);
 
       gameRef.add(hudMessage);
+      gameRef.currentlySpeakingNPC = true; // Set flag to indicate speaking
       messageDisplayed = true;
 
       Future.delayed(Duration(seconds: 3), () {
         if (messageDisplayed) {
           gameRef.remove(hudMessage);
+          gameRef.currentlySpeakingNPC = false; // Reset flag after speaking
           messageDisplayed = false;
         }
       });
@@ -147,7 +151,7 @@ class NPC extends SpriteAnimationGroupComponent
     if (other is Player) {
       playerColliding = true;
 
-      if (other.hasInteracted) {
+      if (other.hasInteracted && !gameRef.currentlySpeakingNPC) {
         playerHasInteracted = true;
 
         hudMessage.message = dialogues[Random().nextInt(dialogues.length)];
@@ -158,8 +162,17 @@ class NPC extends SpriteAnimationGroupComponent
         }
 
         gameRef.add(hudMessage);
+        gameRef.currentlySpeakingNPC = true; // Set flag to indicate speaking
         messageDisplayed = true;
 
+        Future.delayed(Duration(seconds: 3), () {
+          // Check if hudMessage is still a child of the game before removing it
+          if (gameRef.children.contains(hudMessage)) {
+            gameRef.remove(hudMessage);
+          }
+          gameRef.currentlySpeakingNPC = false; // Reset flag after speaking
+          messageDisplayed = false;
+        });
         other.hasInteracted = false;
       }
     }
@@ -172,6 +185,7 @@ class NPC extends SpriteAnimationGroupComponent
       playerColliding = false;
       if (messageDisplayed) {
         gameRef.remove(hudMessage);
+        gameRef.currentlySpeakingNPC = false; // Reset flag after player leaves
         messageDisplayed = false;
       }
       current = NPCState.walking;
@@ -198,6 +212,8 @@ class NPC extends SpriteAnimationGroupComponent
         break;
     }
   }
+
+  // Movement methods for NPC types
 
   void _bakerMovement(double dt) {
     if (movingLeft) {

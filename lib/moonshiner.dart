@@ -7,6 +7,7 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/painting.dart';
 import 'package:moonshiner_game/components/button.dart';
 import 'package:moonshiner_game/components/developer_message.dart';
+import 'package:moonshiner_game/components/fade.dart';
 import 'package:moonshiner_game/components/level_one.dart';
 import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/components/player.dart';
@@ -32,6 +33,8 @@ class Moonshiner extends FlameGame
   bool showControls = true;
   bool playSounds = true;
   double soundVolume = 1.0;
+
+  bool currentlySpeakingNPC = false; // Track if an NPC is speaking
 
   String developerMessage =
       ''; // Shared variable to store the developer message
@@ -217,14 +220,41 @@ class Moonshiner extends FlameGame
 
   // Loading Next and Previous Levels
   Future<void> loadNextLevel() async {
-    currentLevelIndex = (currentLevelIndex + 1) % levelNames.length;
-    _loadLevel(currentLevelIndex);
+    // Add the fade effect component to the game
+    final fadeEffect = FadeEffect(size);
+    add(fadeEffect);
+
+    // Start the fade-in animation
+    fadeEffect.startFade();
+
+    // Delay loading the next level until the fade-in completes
+    Future.delayed(Duration(seconds: 1), () {
+      currentLevelIndex = (currentLevelIndex + 1) % levelNames.length;
+      _loadLevel(currentLevelIndex);
+
+      // Remove the fade effect after the transition
+      fadeEffect.removeFromParent();
+    });
   }
 
   Future<void> loadPreviousLevel() async {
+    // Only load the previous level if we aren't at the start
     if (currentLevelIndex > 0) {
-      currentLevelIndex--;
-      _loadLevel(currentLevelIndex);
+      // Add the fade effect component to the game
+      final fadeEffect = FadeEffect(size);
+      add(fadeEffect);
+
+      // Start the fade-in animation
+      fadeEffect.startFade();
+
+      // Delay loading the previous level until the fade-in completes
+      Future.delayed(Duration(seconds: 1), () {
+        currentLevelIndex--;
+        _loadLevel(currentLevelIndex);
+
+        // Remove the fade effect after the transition
+        fadeEffect.removeFromParent();
+      });
     }
   }
 }
