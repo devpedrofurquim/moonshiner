@@ -64,6 +64,13 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
     textComponent.position = backgroundBox.size / 2 - textComponent.size / 2;
   }
 
+  @override
+  void onMount() {
+    super.onMount();
+    // Call showWithTimeout here to ensure component is fully loaded
+    showWithTimeout(Duration(seconds: 2));
+  }
+
   void showWithTimeout(Duration duration) {
     // Show the dialogue and remove it after the specified timeout
     Future.delayed(duration, () {

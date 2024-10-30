@@ -19,29 +19,8 @@ class OldLady extends AbstractNPC {
         );
 
   @override
-  Color getColorForNPC() => Colors.grey;
-
-  @override
-  void showDialogue() {
-    if (messageDisplayed) return;
-
-    final message = dialogues[currentDialogueIndex];
-    currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
-
-    final npcDialogue = NPCDialogueComponent(
-      message: message,
-      npcColor: getColorForNPC(),
-    );
-
-    gameRef.add(npcDialogue);
-    npcDialogue.showWithTimeout(
-        Duration(seconds: 2)); // Shorter duration for JournalGuy
-
-    messageDisplayed = true;
-    Future.delayed(Duration(seconds: 2), () {
-      messageDisplayed = false;
-    });
-  }
+  Color getColorForNPC() =>
+      Color(0xFF800080); // Use a pure Color instead of MaterialColor
 
   @override
   void updateMovement(double dt) {

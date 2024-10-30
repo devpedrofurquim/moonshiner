@@ -170,6 +170,12 @@ class Level extends World with HasGameRef<Moonshiner> {
             block =
                 CollisionBlock(position: position, size: size, isPlayer: true);
             break;
+          case 'NPC': // New case to handle NPC-specific collision blocks
+            block = CollisionBlock(
+              position: position,
+              size: size,
+            );
+            break;
           default:
             block = CollisionBlock(position: position, size: size);
         }
@@ -179,6 +185,7 @@ class Level extends World with HasGameRef<Moonshiner> {
       }
     }
 
+    // Assign the collision blocks to the player, NPCs, and other entities as needed
     player.collisionBlocks = collisionBlocks;
     npcs.forEach((npc) => npc.collisionBlocks = collisionBlocks);
   }

@@ -38,6 +38,7 @@ class Player extends SpriteAnimationGroupComponent
   double horizontalMovement = 0;
   double verticalMovement = 0;
   double moveSpeed = 50;
+  bool isInteracting = false; // Add this flag to manage interactions
   Vector2 velocity = Vector2.zero();
   List<CollisionBlock> collisionBlocks = [];
   final double _gravity = 8.9;
@@ -57,9 +58,17 @@ class Player extends SpriteAnimationGroupComponent
     return super.onLoad();
   }
 
-  void interact() {
-    hasInteracted = true; // This sets up interaction
-    print("Player interaction activated.");
+  void interact(List<AbstractNPC> npcs) {
+    hasInteracted = true; // Set up interaction
+
+    // Check each NPC for interaction
+    for (final npc in npcs) {
+      if (npc.hasSpokenOnCollision) {
+        npc.continueDialogue();
+        break; // Stop after the first valid interaction
+      }
+    }
+    hasInteracted = false; // Reset after interaction
   }
 
   @override

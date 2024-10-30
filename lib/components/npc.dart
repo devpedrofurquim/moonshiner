@@ -20,6 +20,7 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
   Vector2 velocity = Vector2.zero();
   bool movingLeft = true;
   bool messageDisplayed = false;
+  bool hasSpokenOnCollision = false; // Flag to track collision-based dialogue
   List<CollisionBlock> collisionBlocks = [];
   bool movingUp = true;
   double changeDirectionProbability = 0.003;
@@ -38,14 +39,20 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
     required this.npcCharacter,
     required this.dialogues,
     required Vector2 position,
-    int priority = 50, // Set default priority here
+    int priority = 50,
   }) : super(position: position, priority: priority);
 
   @override
-  FutureOr<void> onLoad() async {
-    _loadAllAnimations();
-    add(RectangleHitbox()..debugMode = false); // Basic collision hitbox
+  Future<void> onLoad() async {
     super.onLoad();
+    _loadAllAnimations();
+    add(RectangleHitbox()..debugMode = false);
+
+    if (gameRef == null) {
+      print("Warning: gameRef is null in AbstractNPC");
+    } else {
+      print("gameRef is initialized in AbstractNPC");
+    }
   }
 
   void _loadAllAnimations() {
@@ -63,8 +70,7 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player) {
-      print("AbstractNPC collided with Player");
-      collidingWithPlayer(); // Call your interaction logic here
+      collidingWithPlayer();
     }
     super.onCollisionStart(intersectionPoints, other);
   }
@@ -81,26 +87,68 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
   }
 
   void collidingWithPlayer() {
-    if (!messageDisplayed && !gameRef.currentlySpeakingNPC) {
+    if (!hasSpokenOnCollision &&
+        !messageDisplayed &&
+        !gameRef.player.isInteracting) {
+      print("${npcCharacter} starts speaking.");
+      gameRef.player.isInteracting = true;
+      showDialogue();
+      hasSpokenOnCollision = true;
+    }
+  }
+
+  void continueDialogue() {
+    if (hasSpokenOnCollision && !messageDisplayed) {
       showDialogue();
     }
   }
 
-  void showDialogue(); // Define specific behavior in each subclass
+  void showDialogue() {
+    if (messageDisplayed || gameRef == null) return;
 
-  Color getColorForNPC(); // Define in each subclass
+    print("${npcCharacter} is showing dialogue.");
+
+    final message = dialogues[currentDialogueIndex];
+    currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+
+    final npcDialogue = NPCDialogueComponent(
+      message: message,
+      npcColor: getColorForNPC(),
+    );
+
+    gameRef.add(npcDialogue);
+    npcDialogue.showWithTimeout(Duration(seconds: 2));
+
+    messageDisplayed = true;
+
+    Future.delayed(Duration(seconds: 2), () {
+      messageDisplayed = false;
+      gameRef.player.isInteracting = false;
+      print("${npcCharacter} finished speaking.");
+      if (currentDialogueIndex == 0) {
+        hasSpokenOnCollision = false;
+      }
+    });
+  }
+
+  Color getColorForNPC(); // Implemented in subclasses
 
   @override
   void update(double dt) {
     final Vector2 playerPosition = gameRef.player.position;
     final double distanceToPlayer = playerPosition.distanceTo(position);
 
-    _checkCollisions();
+    _checkCollisions(); // Call collision check every frame
 
     if (distanceToPlayer < 50) {
       velocity = Vector2.zero();
       current = NPCState.idle;
+      collidingWithPlayer(); // Trigger dialogue if close enough
     } else {
+      // Reset `hasSpokenOnCollision` only when the player moves far enough away
+      if (distanceToPlayer > 70) {
+        hasSpokenOnCollision = false;
+      }
       updateMovement(dt);
       current = NPCState.walking;
     }
