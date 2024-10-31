@@ -47,6 +47,7 @@ class Player extends SpriteAnimationGroupComponent
   bool hasInteracted = false;
   double fixedDeltaTime = 1 / 60;
   double accumulatedTime = 0;
+  final double dialogueRange = 40.0;
 
   @override
   FutureOr<void> onLoad() {
@@ -59,16 +60,15 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void interact(List<AbstractNPC> npcs) {
-    hasInteracted = true; // Set up interaction
+    hasInteracted = true;
 
-    // Check each NPC for interaction
     for (final npc in npcs) {
       if (npc.hasSpokenOnCollision) {
         npc.continueDialogue();
-        break; // Stop after the first valid interaction
+        break;
       }
     }
-    hasInteracted = false; // Reset after interaction
+    hasInteracted = false;
   }
 
   @override
@@ -131,6 +131,7 @@ class Player extends SpriteAnimationGroupComponent
       _updatePlayerState(fixedDeltaTime);
       _updatePlayerMovement(fixedDeltaTime);
       _checkCollisions();
+      _checkNPCProximity(gameRef.activeNpcs); // Check for NPC proximity
       accumulatedTime -= fixedDeltaTime;
     }
     super.update(dt);
@@ -156,6 +157,21 @@ class Player extends SpriteAnimationGroupComponent
           stepTime: stepTime,
           textureSize: Vector2.all(32),
         ));
+  }
+
+  void _checkNPCProximity(List<AbstractNPC> npcs) {
+    for (final npc in npcs) {
+      double distanceToNPC = npc.position.distanceTo(position);
+      bool inRange = distanceToNPC < dialogueRange;
+
+      if (inRange && !npc.hasDialogue) {
+        npc.showDialogue();
+        npc.hasDialogue = true;
+      } else if (!inRange && npc.hasDialogue) {
+        npc.dialogueComponent?.clearMessageWithTypewriter();
+        npc.hasDialogue = false;
+      }
+    }
   }
 
   void _updatePlayerState(double dt) {

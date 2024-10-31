@@ -2,79 +2,110 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class NPCDialogueComponent extends PositionComponent with HasGameRef {
-  final String message;
-  final Color npcColor; // Unique color representing the NPC
+  List<String> messages; // Allow messages to be updated
+  final Color npcColor;
+  int currentMessageIndex = 0;
   late TextComponent textComponent;
   late RectangleComponent backgroundBox;
   late RectangleComponent npcIndicatorBox;
+  late Timer typewriterTimer;
+  String displayedText = '';
+  bool isTyping = true;
 
   NPCDialogueComponent({
-    required this.message,
+    required this.messages,
     required this.npcColor,
   }) {
-    priority = 100; // Display above other components
+    priority = 100;
   }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Style the dialogue text
     textComponent = TextComponent(
-      text: message,
+      text: '',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 24.0, // Increased font size
+          fontSize: 24.0,
           fontFamily: 'Arial',
           fontWeight: FontWeight.bold,
         ),
       ),
     );
 
-    // Background box for the text with additional padding
     backgroundBox = RectangleComponent(
-      size: Vector2(textComponent.width + 70, textComponent.height + 40),
+      size: Vector2(textComponent.width + 40, textComponent.height + 20),
       paint: Paint()..color = Colors.black.withOpacity(0.85),
-    )
-      ..position =
-          Vector2(30, 10) // Position with padding for the NPC indicator
-      ..anchor = Anchor.topLeft;
+    );
 
-    // NPC color indicator box
     npcIndicatorBox = RectangleComponent(
-      size: Vector2(30, textComponent.height + 40), // Increased size
+      size: Vector2(20, textComponent.height + 20),
       paint: Paint()..color = npcColor,
-    )
-      ..position = Vector2(0, 10) // Positioned on the left with padding
-      ..anchor = Anchor.topLeft;
+    );
 
-    // Add components to the dialogue component
     add(npcIndicatorBox);
     add(backgroundBox);
     add(textComponent);
 
-    // Position the dialogue component at the bottom of the screen
     position = Vector2(
       gameRef.size.x / 2 - backgroundBox.width / 2,
-      gameRef.size.y - backgroundBox.height - 80, // Move it up a bit
+      gameRef.size.y - 120,
     );
 
-    // Center the text inside the background box
-    textComponent.position = backgroundBox.size / 2 - textComponent.size / 2;
+    _showMessageWithTypewriter(messages[currentMessageIndex]);
+  }
+
+  void _showMessageWithTypewriter(String message) {
+    displayedText = '';
+    isTyping = true;
+    typewriterTimer = Timer(0.05, repeat: true, onTick: () {
+      if (displayedText.length < message.length) {
+        displayedText += message[displayedText.length];
+        textComponent.text = displayedText;
+
+        backgroundBox.size =
+            Vector2(textComponent.width + 40, textComponent.height + 20);
+        npcIndicatorBox.size = Vector2(20, backgroundBox.height);
+
+        textComponent.position = Vector2(
+          backgroundBox.size.x / 2 - textComponent.width / 2,
+          backgroundBox.size.y / 2 - textComponent.height / 2,
+        );
+
+        npcIndicatorBox.position = Vector2(-npcIndicatorBox.width - 10, 0);
+      } else {
+        isTyping = false;
+        typewriterTimer.stop();
+      }
+    });
+    typewriterTimer.start();
+  }
+
+  void updateMessage(String newMessage) {
+    currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+    _showMessageWithTypewriter(newMessage);
+  }
+
+  void clearMessageWithTypewriter() {
+    isTyping = true;
+    typewriterTimer = Timer(0.05, repeat: true, onTick: () {
+      if (displayedText.isNotEmpty) {
+        displayedText = displayedText.substring(0, displayedText.length - 1);
+        textComponent.text = displayedText;
+      } else {
+        isTyping = false;
+        typewriterTimer.stop();
+        removeFromParent();
+      }
+    });
+    typewriterTimer.start();
   }
 
   @override
-  void onMount() {
-    super.onMount();
-    // Call showWithTimeout here to ensure component is fully loaded
-    showWithTimeout(Duration(seconds: 2));
-  }
-
-  void showWithTimeout(Duration duration) {
-    // Show the dialogue and remove it after the specified timeout
-    Future.delayed(duration, () {
-      removeFromParent();
-    });
+  void update(double dt) {
+    super.update(dt);
+    typewriterTimer.update(dt);
   }
 }
