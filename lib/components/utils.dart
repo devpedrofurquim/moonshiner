@@ -1,9 +1,13 @@
+import 'package:moonshiner_game/components/collision_block.dart';
+import 'package:moonshiner_game/components/custom_hitbox.dart';
+
 bool checkCollision(player, block) {
   final hitbox = player.hitbox;
   final playerX = player.position.x + hitbox.offsetX;
   final playerY = player.position.y + hitbox.offsetY;
   final playerWidth = hitbox.width;
   final playerHeight = hitbox.height;
+  List<CollisionBlock> collisionBlocks = [];
 
   final blockX = block.x;
   final blockY = block.y;

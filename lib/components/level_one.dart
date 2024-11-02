@@ -13,27 +13,23 @@ class LevelOne extends Level {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Debug message to ensure this code runs
     print("LevelOne onLoad called");
 
-    // Set up the transition callback
     player.onLevelTransition = () => endLevelAndMoveToMoonshiner();
 
-    // Show initial HUD message only if it hasn't been shown yet
     if (!gameRef.hasShownLevelOneIntro) {
-      // Use a loop to keep checking the screen size until it's initialized
       _showIntroMessageWhenReady();
-      gameRef.hasShownLevelOneIntro = true; // Mark the message as shown
+      gameRef.hasShownLevelOneIntro = true;
     }
+
+    // Customize dialogues for the Wife in LevelOne
+    _customizeWifeDialogues();
   }
 
   void _showIntroMessageWhenReady() async {
-    // Keep checking the gameRef size until it is fully initialized
     while (gameRef.size.x == 0 || gameRef.size.y == 0) {
       await Future.delayed(Duration(milliseconds: 100));
     }
-
-    // Once initialized, show the developer message
     print("Attempting to show developer message in LevelOne");
     gameRef.showDeveloperMessage(
         "Talk to your wife to start your journey to Moonshiner.");
@@ -42,9 +38,30 @@ class LevelOne extends Level {
   void endLevelAndMoveToMoonshiner() {
     gameRef.showDeveloperMessage("Time to head to Moonshiner!");
 
-    // Delay level transition to show the message
     Future.delayed(Duration(seconds: 2), () {
       gameRef.loadNextLevel();
     });
+  }
+
+  void _customizeWifeDialogues() {
+    try {
+      // Locate the Wife instance and update her dialogues
+      final wife = children.firstWhere((child) => child is Wife) as Wife;
+      wife.dialogues = [
+        "Are you ready for this journey, my love?",
+        "I hope everything goes well in Moonshiner.",
+        "I'm a bit nervous... but excited too!",
+        "Don't forget to check our belongings.",
+        "Promise me we’ll make it through anything together.",
+        "I’ll miss this place... but I'm ready for a fresh start.",
+        "Moonshiner... it sounds mysterious, doesn’t it?",
+        "I hope the townspeople are friendly.",
+        "Whatever happens, I’ll always be by your side.",
+        "Let’s make the most of our new life, one day at a time."
+      ];
+    } catch (e) {
+      // Handle the case where Wife component is not found
+      print("Wife component not found in children.");
+    }
   }
 }

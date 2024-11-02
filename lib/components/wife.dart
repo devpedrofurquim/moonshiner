@@ -1,7 +1,8 @@
 import 'dart:async';
-
+import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:moonshiner_game/components/dialogue.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 import 'dart:math';
@@ -16,14 +17,14 @@ class Wife extends SpriteAnimationGroupComponent
   late SpriteAnimation idleAnimation;
   late SpriteAnimation runningAnimation;
   final double stepTime = 0.05;
-  bool playerColliding = false; // Flag to track player collision
-  bool playerHasInteracted = false;
-  bool messageDisplayed = false; // Flag to track if the message is displayed
+  bool playerColliding = false;
   Vector2 velocity = Vector2.zero();
-  double speed = 50; // Speed of the wife
+  double speed = 50;
+  NPCDialogueComponent? dialogueComponent;
   bool facingRight = true;
-  double minDistance =
-      50; // Minimum distance she should maintain from the player
+  double minDistance = 50;
+  bool hasDialogue = false;
+  bool hasSpokenOnCollision = false;
 
   CustomHitbox hitbox = CustomHitbox(
     offsetX: 10,
@@ -32,6 +33,16 @@ class Wife extends SpriteAnimationGroupComponent
     width: 14,
   );
 
+  List<String> dialogues = [
+    "I really love you, darling!",
+    "What are you thinking about?",
+    "I'm tired! Need rest.",
+    "Do you want to eat something?"
+  ]; // Make sure `dialogues` is not final so it can be modified.
+
+  int currentDialogueIndex = 0;
+  bool messageDisplayed = false;
+  HUDMessage? hudMessage;
   Wife({
     required this.player,
     this.character = 'Mask Dude',
@@ -50,53 +61,21 @@ class Wife extends SpriteAnimationGroupComponent
     return super.onLoad();
   }
 
-  bool isMessage = false; // Declare a variable to store the HUDMessage
-
-  HUDMessage hudMessage = HUDMessage(
-    message: "Hello!",
-    position: Vector2(100, 100), // Adjust position as needed
-  );
-
-  List<String> dialogues = [
-    "I really love you darling!",
-    "What are you thinking about?",
-    "I'm tired! Need rest",
-    "Do you want to eat something?"
-  ];
-  int currentDialogueIndex = 0;
-
-  bool hasDisplayedNewDialogue =
-      false; // Track if new dialogue has been displayed
-
   @override
   void update(double dt) {
-    // Calculate direction vector towards the player
     final Vector2 playerPosition = player.position;
     final Vector2 direction = playerPosition - position;
 
-    // Calculate the distance to the player
     final double distanceToPlayer = direction.length;
 
-    // Normalize the direction vector if she is farther than the minimum distance
     if (distanceToPlayer > minDistance) {
       direction.normalize();
-
-      // Calculate desired velocity
       final desiredVelocity = direction * speed;
-
-      // Smooth out the movement by interpolating velocity
       velocity += (desiredVelocity - velocity) * 10 * dt;
-
-      // Update wife's position
       position += velocity * dt;
-
-      // Set animation to walking
       current = PlayerState.running;
 
-      // Determine the direction the player is facing
       bool playerFacingRight = player.velocity.x >= 0;
-
-      // Flip horizontally if necessary based on wife's position relative to the player
       if (playerFacingRight && !facingRight) {
         flipHorizontallyAroundCenter();
         facingRight = true;
@@ -105,7 +84,6 @@ class Wife extends SpriteAnimationGroupComponent
         facingRight = false;
       }
     } else {
-      // If she is within the minimum distance, stop moving and switch to idle animation
       velocity = Vector2.zero();
       current = PlayerState.idle;
     }
@@ -113,45 +91,63 @@ class Wife extends SpriteAnimationGroupComponent
     super.update(dt);
   }
 
+  void _showDialogue(String message) {
+    if (dialogueComponent != null) {
+      gameRef.remove(dialogueComponent!);
+    }
+
+    // Create and display the new dialogue message
+    dialogueComponent = NPCDialogueComponent(
+      messages: [message],
+      npcColor: Color(0xFF800080), // Use a pure Color instead of MaterialColor
+    );
+    gameRef.add(dialogueComponent!);
+    messageDisplayed = true;
+  }
+
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player) {
       playerColliding = true;
 
-      // Check if the player has interacted
+      // Advance dialogue if the player interacts
       if (other.hasInteracted) {
-        playerHasInteracted = true;
-
         // Move to the next dialogue, loop back if at the end
         currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
 
         // Show the next dialogue message
-        hudMessage.message = dialogues[currentDialogueIndex];
-        hudMessage.position = position + Vector2(0, -30);
-
-        // Remove the previously displayed dialogue message
-        if (messageDisplayed) {
-          gameRef.remove(hudMessage);
-        }
-
-        // Add the new dialogue message to the game
-        gameRef.add(hudMessage);
-        messageDisplayed = true;
-
-        other.hasInteracted = false; // Reset the interaction flag in Player
+        _showDialogue(dialogues[currentDialogueIndex]);
+        other.hasInteracted = false; // Reset interaction flag in Player
       }
     }
     super.onCollision(intersectionPoints, other);
   }
 
   @override
-  void onCollisionEnd(PositionComponent other) {
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Player) {
-      playerColliding = false; // Reset flag when player collision ends
-      // Remove message from the game
-      if (messageDisplayed) {
-        gameRef.remove(hudMessage);
-        messageDisplayed = false;
+      if (!hasDialogue) {
+        // Reset dialogue index for fresh start on first collision
+        currentDialogueIndex = 0;
+        _showDialogue(dialogues[currentDialogueIndex]);
+        hasDialogue = true;
       }
+      other.isInteractingWithNPC = true;
+      hasSpokenOnCollision = true;
+    }
+    super.onCollisionStart(intersectionPoints, other);
+  }
+
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    if (other is Player && messageDisplayed) {
+      // Clear dialogue when player leaves
+      if (dialogueComponent != null) {
+        gameRef.remove(dialogueComponent!);
+        dialogueComponent = null;
+      }
+      messageDisplayed = false;
+      hasDialogue = false; // Reset dialogue state
     }
     super.onCollisionEnd(other);
   }

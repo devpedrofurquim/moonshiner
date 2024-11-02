@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class NPCDialogueComponent extends PositionComponent with HasGameRef {
-  List<String> messages; // Allow messages to be updated
+  List<String> messages;
   final Color npcColor;
   int currentMessageIndex = 0;
   late TextComponent textComponent;
@@ -28,7 +28,7 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 24.0,
+          fontSize: 18.0, // Reduced font size
           fontFamily: 'Arial',
           fontWeight: FontWeight.bold,
         ),
@@ -36,12 +36,12 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
     );
 
     backgroundBox = RectangleComponent(
-      size: Vector2(textComponent.width + 40, textComponent.height + 20),
+      size: Vector2(textComponent.width + 20, textComponent.height + 16),
       paint: Paint()..color = Colors.black.withOpacity(0.85),
     );
 
     npcIndicatorBox = RectangleComponent(
-      size: Vector2(20, textComponent.height + 20),
+      size: Vector2(10, textComponent.height + 16), // Reduced indicator size
       paint: Paint()..color = npcColor,
     );
 
@@ -49,9 +49,10 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
     add(backgroundBox);
     add(textComponent);
 
+    // Center the dialogue box on the screen
     position = Vector2(
-      gameRef.size.x / 2 - backgroundBox.width / 2,
-      gameRef.size.y - 120,
+      gameRef.size.x / 2 - (backgroundBox.size.x / 2),
+      gameRef.size.y - 100, // Adjusted to move it slightly higher
     );
 
     _showMessageWithTypewriter(messages[currentMessageIndex]);
@@ -66,15 +67,15 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
         textComponent.text = displayedText;
 
         backgroundBox.size =
-            Vector2(textComponent.width + 40, textComponent.height + 20);
-        npcIndicatorBox.size = Vector2(20, backgroundBox.height);
+            Vector2(textComponent.width + 20, textComponent.height + 16);
+        npcIndicatorBox.size = Vector2(10, backgroundBox.height);
 
         textComponent.position = Vector2(
           backgroundBox.size.x / 2 - textComponent.width / 2,
           backgroundBox.size.y / 2 - textComponent.height / 2,
         );
 
-        npcIndicatorBox.position = Vector2(-npcIndicatorBox.width - 10, 0);
+        npcIndicatorBox.position = Vector2(-npcIndicatorBox.width - 5, 0);
       } else {
         isTyping = false;
         typewriterTimer.stop();
@@ -84,7 +85,7 @@ class NPCDialogueComponent extends PositionComponent with HasGameRef {
   }
 
   void updateMessage(String newMessage) {
-    currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+    displayedText = '';
     _showMessageWithTypewriter(newMessage);
   }
 

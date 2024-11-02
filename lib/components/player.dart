@@ -36,10 +36,12 @@ class Player extends SpriteAnimationGroupComponent
   );
   bool reachedDoor = false;
   double horizontalMovement = 0;
+  AbstractNPC? activeNPC; // Track the NPC currently in dialogue
   double verticalMovement = 0;
   double moveSpeed = 50;
   bool isInteracting = false; // Add this flag to manage interactions
   Vector2 velocity = Vector2.zero();
+  bool isInteractingWithNPC = false; // Add this flag
   List<CollisionBlock> collisionBlocks = [];
   final double _gravity = 8.9;
   final double _jumpForce = 460;
@@ -59,16 +61,9 @@ class Player extends SpriteAnimationGroupComponent
     return super.onLoad();
   }
 
-  void interact(List<AbstractNPC> npcs) {
-    hasInteracted = true;
-
-    for (final npc in npcs) {
-      if (npc.hasSpokenOnCollision) {
-        npc.continueDialogue();
-        break;
-      }
-    }
-    hasInteracted = false;
+  void interact() {
+    hasInteracted = true; // Set this to true on player interaction
+    if (activeNPC != null) {}
   }
 
   @override
@@ -117,10 +112,21 @@ class Player extends SpriteAnimationGroupComponent
   @override
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other is ItemTip) {
-      other.collidingWithPlayer();
+    if (other is AbstractNPC && activeNPC == null) {
+      activeNPC = other;
     }
     super.onCollisionStart(intersectionPoints, other);
+  }
+
+  // Method to reset active NPC
+  void resetActiveNPC() {
+    activeNPC = null;
+  }
+
+  // Reset interaction flag after each dialogue line is displayed
+  void resetNPCInteraction() {
+    isInteractingWithNPC = false;
+    hasInteracted = false;
   }
 
   @override
@@ -165,7 +171,6 @@ class Player extends SpriteAnimationGroupComponent
       bool inRange = distanceToNPC < dialogueRange;
 
       if (inRange && !npc.hasDialogue) {
-        npc.showDialogue();
         npc.hasDialogue = true;
       } else if (!inRange && npc.hasDialogue) {
         npc.dialogueComponent?.clearMessageWithTypewriter();

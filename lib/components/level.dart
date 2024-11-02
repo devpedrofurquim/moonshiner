@@ -95,8 +95,10 @@ class Level extends World with HasGameRef<Moonshiner> {
             final wife = Wife(player: player);
             wife.position = position;
             wife.dialogues = [
-              "I’m worried... stay close.",
-              "My head feels strange... is it safe here?"
+              "I really love you, darling!",
+              "What are you thinking about?",
+              "I'm tired! Need rest.",
+              "Do you want to eat something?"
             ];
             add(wife);
             break;
