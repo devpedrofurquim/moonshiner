@@ -68,8 +68,11 @@ flutter:
     # - images/a_dot_ham.jpeg
     - assets/tiles/
     - assets/audio/
+    - assets/images/
     - assets/images/Terrain/
     - assets/images/Background/
+    - assets/images/Background/new_sky.png
+    - assets/images/Background/clouds.png
     - assets/images/Main Characters/Mask Dude/
     - assets/images/Main Characters/Ninja Frog/
     - assets/images/Main Characters/Pink Man/

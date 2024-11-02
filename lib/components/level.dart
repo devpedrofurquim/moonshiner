@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:moonshiner_game/components/background_tile.dart';
 import 'package:moonshiner_game/components/baker.dart';
+import 'package:moonshiner_game/components/clouds.dart';
 import 'package:moonshiner_game/components/collision_block.dart';
 import 'package:moonshiner_game/components/journalGuy.dart';
 import 'package:moonshiner_game/components/oldLady.dart';
@@ -69,15 +70,14 @@ class Level extends World with HasGameRef<Moonshiner> {
   }
 
   void _setupBackground() {
-    final backgroundLayer = level.tileMap.getLayer("Background");
+    // Create the background tile directly without checking for color
+    final backgroundTile = BackgroundTile(position: Vector2(0, 50));
+    add(backgroundTile);
 
-    if (backgroundLayer != null) {
-      final backgroundColor =
-          backgroundLayer.properties.getValue("BackgroundColor") ?? 'Gray';
-      final backgroundTile =
-          BackgroundTile(color: backgroundColor, position: Vector2(0, 0));
-      add(backgroundTile);
-    }
+    // Add the clouds layer with different speed
+    final clouds =
+        Clouds(position: Vector2(0, 50)); // Adjust position as needed
+    add(clouds);
   }
 
   void _spawnObjects() {
