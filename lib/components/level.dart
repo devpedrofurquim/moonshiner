@@ -43,7 +43,6 @@ class Level extends World with HasGameRef<Moonshiner> {
     level = await TiledComponent.load('$levelName.tmx', Vector2.all(16));
     add(level);
 
-    _setupBackground();
     _spawnObjects();
     _addCollisionBlocks();
   }
@@ -67,17 +66,6 @@ class Level extends World with HasGameRef<Moonshiner> {
   void unload() {
     _clearPreviousLevel(); // Ensure all components are removed
     removeFromParent();
-  }
-
-  void _setupBackground() {
-    // Create the background tile directly without checking for color
-    final backgroundTile = BackgroundTile(position: Vector2(0, 50));
-    add(backgroundTile);
-
-    // Add the clouds layer with different speed
-    final clouds =
-        Clouds(position: Vector2(0, 50)); // Adjust position as needed
-    add(clouds);
   }
 
   void _spawnObjects() {

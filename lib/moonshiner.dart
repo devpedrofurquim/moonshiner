@@ -73,15 +73,13 @@ class Moonshiner extends FlameGame
     )..priority = 100; // Set a high priority to render above other components
 
     add(developerMessageComponent);
-    developerMessageComponent
-        .showWithTimeout(Duration(seconds: 4)); // Display for 4 seconds
 
     print("Developer message added to the game.");
   }
 
-  // Method to hide the developer message overlay
   void hideDeveloperMessage() {
-    overlays.remove('DeveloperMessage'); // Remove the overlay
+    children.removeWhere((component) => component is DeveloperMessageComponent);
+    print("Developer message removed from the game.");
   }
 
   void _setupCamera(Level level) {

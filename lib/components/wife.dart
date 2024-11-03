@@ -25,6 +25,8 @@ class Wife extends SpriteAnimationGroupComponent
   double minDistance = 50;
   bool hasDialogue = false;
   bool hasSpokenOnCollision = false;
+  bool hasFirstInteracted = false;
+  VoidCallback? onPlayerInteraction;
 
   CustomHitbox hitbox = CustomHitbox(
     offsetX: 10,
@@ -91,6 +93,14 @@ class Wife extends SpriteAnimationGroupComponent
     super.update(dt);
   }
 
+  // Call this method when the player interacts with the wife
+  void interactWithPlayer() {
+    // Trigger the onPlayerInteraction callback, if it's set
+    if (onPlayerInteraction != null) {
+      onPlayerInteraction!();
+    }
+  }
+
   void _showDialogue(String message) {
     if (dialogueComponent != null) {
       gameRef.remove(dialogueComponent!);
@@ -113,6 +123,10 @@ class Wife extends SpriteAnimationGroupComponent
       if (other.hasInteracted) {
         // Move to the next dialogue, loop back if at the end
         currentDialogueIndex = (currentDialogueIndex + 1) % dialogues.length;
+        if (!hasFirstInteracted) {
+          onPlayerInteraction?.call();
+          hasFirstInteracted = true;
+        }
 
         // Show the next dialogue message
         _showDialogue(dialogues[currentDialogueIndex]);

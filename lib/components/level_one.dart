@@ -1,3 +1,5 @@
+import 'package:moonshiner_game/components/background_tile.dart';
+import 'package:moonshiner_game/components/clouds.dart';
 import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/moonshiner.dart';
 import 'package:moonshiner_game/components/player.dart';
@@ -6,6 +8,7 @@ import 'package:flame/components.dart';
 import 'level.dart';
 
 class LevelOne extends Level {
+  bool developerMessageVisible = true;
   LevelOne({required String levelName, required Player player})
       : super(levelName: levelName, player: player);
 
@@ -22,8 +25,18 @@ class LevelOne extends Level {
       gameRef.hasShownLevelOneIntro = true;
     }
 
+    // Call the customized background setup for LevelOne
+    _setupBackground();
+
     // Customize dialogues for the Wife in LevelOne
     _customizeWifeDialogues();
+  }
+
+  // Override _setupBackground for LevelOne
+  void _setupBackground() {
+    // Define the background specific to LevelOne
+    final backgroundTile = BackgroundTile(position: Vector2(0, 50));
+    add(backgroundTile);
   }
 
   void _showIntroMessageWhenReady() async {
@@ -59,6 +72,14 @@ class LevelOne extends Level {
         "Whatever happens, I’ll always be by your side.",
         "Let’s make the most of our new life, one day at a time."
       ];
+
+      // Add interaction logic
+      wife.onPlayerInteraction = () {
+        if (developerMessageVisible) {
+          gameRef.hideDeveloperMessage();
+          developerMessageVisible = false;
+        }
+      };
     } catch (e) {
       // Handle the case where Wife component is not found
       print("Wife component not found in children.");
