@@ -2,6 +2,8 @@ import 'package:moonshiner_game/components/background_tile.dart';
 import 'package:moonshiner_game/components/clouds.dart';
 import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/moonshiner.dart';
+import 'package:moonshiner_game/components/WifesFather.dart';
+import 'package:moonshiner_game/components/WifesMom.dart';
 import 'package:moonshiner_game/components/player.dart';
 import 'package:moonshiner_game/components/wife.dart';
 import 'package:flame/components.dart';
@@ -30,6 +32,9 @@ class LevelOne extends Level {
 
     // Customize dialogues for the Wife in LevelOne
     _customizeWifeDialogues();
+
+    // Spawn the Wife's parents (Father and Mom)
+    _spawnParents();
   }
 
   // Override _setupBackground for LevelOne
@@ -83,6 +88,47 @@ class LevelOne extends Level {
     } catch (e) {
       // Handle the case where Wife component is not found
       print("Wife component not found in children.");
+    }
+  }
+
+  void _spawnParents() {
+    // Position them based on your map or desired coordinates
+    final fatherPosition = Vector2(100, 200); // Example position
+    final motherPosition = Vector2(150, 200); // Example position
+
+    // Create the father and mother NPCs
+    final wifesFather = WifesFather(position: fatherPosition);
+    final wifesMom = WifesMom(position: motherPosition);
+
+    // Add them to the game world
+    add(wifesFather);
+    add(wifesMom);
+
+    // Optional: Handle goodbye logic (see next section)
+    wifesFather.onPlayerInteraction = _onGoodbyeFather;
+    wifesMom.onPlayerInteraction = _onGoodbyeMother;
+  }
+
+  bool saidGoodbyeToFather = false;
+  bool saidGoodbyeToMother = false;
+
+  void _onGoodbyeFather() {
+    saidGoodbyeToFather = true;
+    _checkAllGoodbyes();
+  }
+
+  void _onGoodbyeMother() {
+    saidGoodbyeToMother = true;
+    _checkAllGoodbyes();
+  }
+
+  void _checkAllGoodbyes() {
+    if (saidGoodbyeToFather && saidGoodbyeToMother) {
+      gameRef
+          .showDeveloperMessage("You said goodbye to everyone. Time to leave!");
+      Future.delayed(Duration(seconds: 2), () {
+        endLevelAndMoveToMoonshiner();
+      });
     }
   }
 }

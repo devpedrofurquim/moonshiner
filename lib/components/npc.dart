@@ -30,6 +30,9 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
   int maxStillnessDuration = 60;
   int currentDialogueIndex = 0;
 
+  // Add this field for player interaction callbacks
+  void Function()? onPlayerInteraction;
+
   AbstractNPC({
     required this.npcCharacter,
     required this.dialogues,
