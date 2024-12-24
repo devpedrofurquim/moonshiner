@@ -22,6 +22,7 @@ class Moonshiner extends FlameGame
         TapCallbacks {
   // UI Components
   late JoystickComponent joyStick;
+  Level? currentLevel; // Define currentLevel as nullable
   late Button interactButton;
   List<AbstractNPC> activeNpcs = []; // Track active NPCs in the current level
   late HUDMessage hudMessage;
@@ -74,6 +75,11 @@ class Moonshiner extends FlameGame
 
     add(developerMessageComponent);
 
+    // Automatically remove the message after 3 seconds
+    Future.delayed(Duration(seconds: 3), () {
+      developerMessageComponent.removeFromParent();
+    });
+
     print("Developer message added to the game.");
   }
 
@@ -101,12 +107,18 @@ class Moonshiner extends FlameGame
       }
     });
 
+    // Ensure previous level is unloaded
+    if (currentLevel != null) {
+      currentLevel!.unload();
+      currentLevel = null;
+    }
+
     // Initialize player and set position
     player = Player(character: 'Guy', position: Vector2(100, 100));
 
-    late final level;
+    late final Level level;
 
-    // Create new level instance
+    // Create new level instance based on the index
     if (index == 0) {
       level = LevelOne(
         levelName: levelNames[index],
@@ -119,10 +131,14 @@ class Moonshiner extends FlameGame
       );
     }
 
+    // Set current level to the new level
+    currentLevel = level;
+
     // Set up the camera for the new level and add level to the game
     _setupCamera(level);
     add(level);
 
+    // Play the background music for the new level
     playBackgroundMusicForLevel(levelNames[index]);
   }
 
@@ -227,7 +243,15 @@ class Moonshiner extends FlameGame
 
     // Delay loading the next level until the fade-in completes
     Future.delayed(Duration(seconds: 1), () {
+      // Unload the current level to ensure all components are cleared
+      if (currentLevel != null) {
+        currentLevel!.unload();
+      }
+
+      // Increment the level index and loop back if necessary
       currentLevelIndex = (currentLevelIndex + 1) % levelNames.length;
+
+      // Load the next level
       _loadLevel(currentLevelIndex);
 
       // Remove the fade effect after the transition

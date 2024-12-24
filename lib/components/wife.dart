@@ -155,8 +155,8 @@ class Wife extends SpriteAnimationGroupComponent
   @override
   void onCollisionEnd(PositionComponent other) {
     if (other is Player && messageDisplayed) {
-      // Clear dialogue when player leaves
-      if (dialogueComponent != null) {
+      // Clear dialogue when the player leaves
+      if (dialogueComponent != null && dialogueComponent!.isMounted) {
         gameRef.remove(dialogueComponent!);
         dialogueComponent = null;
       }

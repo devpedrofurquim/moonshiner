@@ -11,6 +11,12 @@ import 'level.dart';
 
 class LevelOne extends Level {
   bool developerMessageVisible = true;
+
+  // Mission state
+  bool talkedToWife = false;
+  bool saidGoodbyeToFather = false;
+  bool saidGoodbyeToMother = false;
+
   LevelOne({required String levelName, required Player player})
       : super(levelName: levelName, player: player);
 
@@ -20,26 +26,19 @@ class LevelOne extends Level {
 
     print("LevelOne onLoad called");
 
-    player.onLevelTransition = () => endLevelAndMoveToMoonshiner();
+    player.onLevelTransition = _tryToMoveToNextLevel;
 
     if (!gameRef.hasShownLevelOneIntro) {
       _showIntroMessageWhenReady();
       gameRef.hasShownLevelOneIntro = true;
     }
 
-    // Call the customized background setup for LevelOne
     _setupBackground();
-
-    // Customize dialogues for the Wife in LevelOne
     _customizeWifeDialogues();
-
-    // Spawn the Wife's parents (Father and Mom)
     _spawnParents();
   }
 
-  // Override _setupBackground for LevelOne
   void _setupBackground() {
-    // Define the background specific to LevelOne
     final backgroundTile = BackgroundTile(position: Vector2(0, 50));
     add(backgroundTile);
   }
@@ -53,6 +52,30 @@ class LevelOne extends Level {
         "Talk to your wife to start your journey to Moonshiner.");
   }
 
+  void _tryToMoveToNextLevel() {
+    if (talkedToWife && saidGoodbyeToFather && saidGoodbyeToMother) {
+      endLevelAndMoveToMoonshiner();
+    } else {
+      // Build the message for incomplete tasks
+      List<String> incompleteTasks = [];
+      if (!talkedToWife) {
+        incompleteTasks.add("Talk to your wife.");
+      }
+      if (!saidGoodbyeToFather) {
+        incompleteTasks.add("Say goodbye to her father.");
+      }
+      if (!saidGoodbyeToMother) {
+        incompleteTasks.add("Say goodbye to her mother.");
+      }
+
+      // Join the incomplete tasks into a single line
+      String message = incompleteTasks.join(" ");
+
+      // Show the message
+      gameRef.showDeveloperMessage(message);
+    }
+  }
+
   void endLevelAndMoveToMoonshiner() {
     gameRef.showDeveloperMessage("Time to head to Moonshiner!");
 
@@ -63,7 +86,6 @@ class LevelOne extends Level {
 
   void _customizeWifeDialogues() {
     try {
-      // Locate the Wife instance and update her dialogues
       final wife = children.firstWhere((child) => child is Wife) as Wife;
       wife.dialogues = [
         "Are you ready for this journey, my love?",
@@ -78,47 +100,42 @@ class LevelOne extends Level {
         "Let’s make the most of our new life, one day at a time."
       ];
 
-      // Add interaction logic
       wife.onPlayerInteraction = () {
         if (developerMessageVisible) {
           gameRef.hideDeveloperMessage();
           developerMessageVisible = false;
         }
+        talkedToWife = true; // Mark mission as completed
+        print("Talked to wife: $talkedToWife"); // Debug log
       };
     } catch (e) {
-      // Handle the case where Wife component is not found
       print("Wife component not found in children.");
     }
   }
 
   void _spawnParents() {
-    // Position them based on your map or desired coordinates
-    final fatherPosition = Vector2(100, 200); // Example position
-    final motherPosition = Vector2(150, 200); // Example position
+    final fatherPosition = Vector2(100, 200);
+    final motherPosition = Vector2(150, 200);
 
-    // Create the father and mother NPCs
     final wifesFather = WifesFather(position: fatherPosition);
     final wifesMom = WifesMom(position: motherPosition);
 
-    // Add them to the game world
     add(wifesFather);
     add(wifesMom);
 
-    // Optional: Handle goodbye logic (see next section)
     wifesFather.onPlayerInteraction = _onGoodbyeFather;
     wifesMom.onPlayerInteraction = _onGoodbyeMother;
   }
 
-  bool saidGoodbyeToFather = false;
-  bool saidGoodbyeToMother = false;
-
   void _onGoodbyeFather() {
-    saidGoodbyeToFather = true;
+    saidGoodbyeToFather = true; // Mark mission as completed
+    print("Said goodbye to father: $saidGoodbyeToFather"); // Debug log
     _checkAllGoodbyes();
   }
 
   void _onGoodbyeMother() {
-    saidGoodbyeToMother = true;
+    saidGoodbyeToMother = true; // Mark mission as completed
+    print("Said goodbye to mother: $saidGoodbyeToMother"); // Debug log
     _checkAllGoodbyes();
   }
 
@@ -126,9 +143,6 @@ class LevelOne extends Level {
     if (saidGoodbyeToFather && saidGoodbyeToMother) {
       gameRef
           .showDeveloperMessage("You said goodbye to everyone. Time to leave!");
-      Future.delayed(Duration(seconds: 2), () {
-        endLevelAndMoveToMoonshiner();
-      });
     }
   }
 }
