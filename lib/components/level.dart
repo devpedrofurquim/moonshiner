@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:moonshiner_game/components/WifesMom.dart';
 import 'package:moonshiner_game/components/background_tile.dart';
 import 'package:moonshiner_game/components/baker.dart';
 import 'package:moonshiner_game/components/clouds.dart';

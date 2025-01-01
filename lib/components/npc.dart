@@ -42,7 +42,10 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
 
   @override
   Future<void> onLoad() async {
-    _loadAllAnimations();
+    // Only load default animations if they haven't been overridden by a subclass
+    if (animations == null || animations!.isEmpty) {
+      loadAllAnimations();
+    }
     add(RectangleHitbox()..debugMode = false);
     return super.onLoad();
   }
@@ -54,9 +57,9 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
     width: 14,
   );
 
-  void _loadAllAnimations() {
-    final idleAnimation = _spriteAnimation('Idle', 11);
-    final walkingAnimation = _spriteAnimation('Run', 12);
+  void loadAllAnimations() {
+    final idleAnimation = spriteAnimation('Idle', 11);
+    final walkingAnimation = spriteAnimation('Run', 12);
 
     animations = {
       NPCState.idle: idleAnimation,
@@ -65,7 +68,7 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
     current = NPCState.walking;
   }
 
-  SpriteAnimation _spriteAnimation(String state, int amount) {
+  SpriteAnimation spriteAnimation(String state, int amount) {
     return SpriteAnimation.fromFrameData(
       game.images.fromCache('Main Characters/Journal Guy/$state (32x32).png'),
       SpriteAnimationData.sequenced(
@@ -148,7 +151,7 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
     final Vector2 playerPosition = gameRef.player.position;
     final double distanceToPlayer = playerPosition.distanceTo(position);
 
-    _checkCollisions();
+    checkCollisions();
 
     // Show dialogue if player is close, hide if far away
     if (distanceToPlayer < 50) {
@@ -164,7 +167,7 @@ abstract class AbstractNPC extends SpriteAnimationGroupComponent
     super.update(dt);
   }
 
-  void _checkCollisions() {
+  void checkCollisions() {
     for (final block in collisionBlocks) {
       if (checkCollision(this, block)) {
         if (velocity.x != 0 || velocity.y != 0) {

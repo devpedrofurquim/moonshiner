@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
+import 'package:moonshiner_game/components/CharacterShadow.dart';
 import 'package:moonshiner_game/components/custom_hitbox.dart';
 import 'package:moonshiner_game/components/npc.dart';
 import 'package:moonshiner_game/components/itemTip.dart';
@@ -58,6 +59,14 @@ class Player extends SpriteAnimationGroupComponent
     add(RectangleHitbox(
         position: Vector2(hitbox.offsetX, hitbox.offsetY),
         size: Vector2(hitbox.width, hitbox.height)));
+    // Create a shadow component
+    final shadow = CharacterShadow()
+      ..size = Vector2(16, 4) // Adjust size based on your character
+      ..position =
+          Vector2(8, size.y - 4); // Position the shadow below the character
+
+    // Add the shadow as a child
+    add(shadow);
     return super.onLoad();
   }
 
